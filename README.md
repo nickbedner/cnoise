@@ -4,13 +4,14 @@
 
 ### Implemented
 
+Open Simplex Noise<br/>
+
 ### In Progress
 
 ### Planned
 
 Perlin Noise<br/>
 Perlin Worms<br/>
-Open Simplex Noise<br/>
 Worley Noise<br/>
 White Noise<br/>
 GLSL implementations<br/>
