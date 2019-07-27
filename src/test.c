@@ -7,19 +7,7 @@ int open_simplex_noise_test();
 int main(int argc, char *argv[])
 {
     if (open_simplex_noise_test() == 0)
-        printf("Vector test passed!\n");
-
-    if (stack_test() == 0)
-        printf("Stack test passed!\n");
-
-    if (queue_test() == 0)
-        printf("Queue test passed!\n");
-
-    if (array_list_test() == 0)
-        printf("Array list test passed!\n");
-
-    if (priority_queue_test() == 0)
-        printf("Priority queue test passed!\n");
+        printf("Open simplex noise test passed!\n");
 
     return 0;
 }
