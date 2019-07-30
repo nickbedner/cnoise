@@ -2,6 +2,8 @@
 #ifndef OPEN_SIMPLEX_H
 #define OPEN_SIMPLEX_H
 
+/*#include "common.h"
+
 #define STRETCH_CONSTANT_2D -0.211324865405187;    //(1/Math.sqrt(2+1)-1)/2;
 #define SQUISH_CONSTANT_2D 0.366025403784439;      //(Math.sqrt(2+1)-1)/2;
 #define STRETCH_CONSTANT_3D -1.0 / 6;              //(1/Math.sqrt(3+1)-1)/3;
@@ -63,7 +65,7 @@
 	};
 
 	struct OpenSimplexNoise {
-		short perm[256];
+		unsigned char perm[256];
 		short permGradIndex3D[256];
 	};
 
@@ -83,11 +85,6 @@
 	{
 		int index = open_simplex_noise->perm[(open_simplex_noise->perm[(open_simplex_noise->perm[(open_simplex_noise->perm[xsb & 0xFF] + ysb) & 0xFF] + zsb) & 0xFF] + wsb) & 0xFF] & 0xFC;
 		return gradients4D[index] * dx + gradients4D[index + 1] * dy + gradients4D[index + 2] * dz + gradients4D[index + 3] * dw;
-	}
-	
-	static inline int fastFloor(double x) {
-		int xi = (int)x;
-		return x < xi ? xi - 1 : xi;
 	}
 
 	//Initializes the class using a permutation array generated from a 64-bit seed.
@@ -122,8 +119,8 @@
 		double ys = y + stretchOffset;
 		
 		//Floor to get grid coordinates of rhombus (stretched square) super-cell origin.
-		int xsb = fastFloor(xs);
-		int ysb = fastFloor(ys);
+		int xsb = fast_floor(xs);
+		int ysb = fast_floor(ys);
 		
 		//Skew out to get actual coordinates of rhombus origin. We'll need these later.
 		double squishOffset = (xsb + ysb) * SQUISH_CONSTANT_2D;
@@ -238,9 +235,9 @@
 		double zs = z + stretchOffset;
 		
 		//Floor to get simplectic honeycomb coordinates of rhombohedron (stretched cube) super-cell origin.
-		int xsb = fastFloor(xs);
-		int ysb = fastFloor(ys);
-		int zsb = fastFloor(zs);
+		int xsb = fast_floor(xs);
+		int ysb = fast_floor(ys);
+		int zsb = fast_floor(zs);
 		
 		//Skew out to get actual coordinates of rhombohedron origin. We'll need these later.
 		double squishOffset = (xsb + ysb + zsb) * SQUISH_CONSTANT_3D;
@@ -800,10 +797,10 @@
 		double ws = w + stretchOffset;
 		
 		//Floor to get simplectic honeycomb coordinates of rhombo-hypercube super-cell origin.
-		int xsb = fastFloor(xs);
-		int ysb = fastFloor(ys);
-		int zsb = fastFloor(zs);
-		int wsb = fastFloor(ws);
+		int xsb = fast_floor(xs);
+		int ysb = fast_floor(ys);
+		int zsb = fast_floor(zs);
+		int wsb = fast_floor(ws);
 		
 		//Skew out to get actual coordinates of stretched rhombo-hypercube origin. We'll need these later.
 		double squishOffset = (xsb + ysb + zsb + wsb) * SQUISH_CONSTANT_4D;
@@ -2101,6 +2098,6 @@
 		}
 
 		return value / NORM_CONSTANT_4D;
-	}
+	}*/
 
 #endif
