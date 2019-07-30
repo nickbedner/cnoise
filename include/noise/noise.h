@@ -4,6 +4,6 @@
 
 #include "opensimplexnoise.h"
 #include "perlinnoise.h"
-#include "worleynoise.h"
+#include "voronoinoise.h"
 
 #endif

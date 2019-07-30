@@ -1,6 +1,6 @@
 #pragma once
-#ifndef WORLEY_NOISE_H
-#define WORLEY_NOISE_H
+#ifndef VORONOI_NOISE_H
+#define VORONOI_NOISE_H
 
 /*#include "common.h"
 
