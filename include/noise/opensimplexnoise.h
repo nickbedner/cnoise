@@ -2,7 +2,7 @@
 #ifndef OPEN_SIMPLEX_H
 #define OPEN_SIMPLEX_H
 
-/*#include "common.h"
+#include "common.h"
 
 #define STRETCH_CONSTANT_2D -0.211324865405187;    //(1/Math.sqrt(2+1)-1)/2;
 #define SQUISH_CONSTANT_2D 0.366025403784439;      //(Math.sqrt(2+1)-1)/2;
@@ -111,7 +111,7 @@
 	}
 	
 	//2D OpenSimplex Noise.
-	double open_simplex_noise_eval2d(struct OpenSimplexNoise *open_simplex_noise, double x, double y) {
+	double open_simplex_noise_eval_2d(struct OpenSimplexNoise *open_simplex_noise, double x, double y) {
 	
 		//Place input coordinates onto grid.
 		double stretchOffset = (x + y) * STRETCH_CONSTANT_2D;
@@ -226,7 +226,7 @@
 	}
 	
 	//3D OpenSimplex Noise.
-	double open_simplex_noise_eval3d(struct OpenSimplexNoise *open_simplex_noise, double x, double y, double z) {
+	double open_simplex_noise_eval_3d(struct OpenSimplexNoise *open_simplex_noise, double x, double y, double z) {
 	
 		//Place input coordinates on simplectic honeycomb.
 		double stretchOffset = (x + y + z) * STRETCH_CONSTANT_3D;
@@ -787,7 +787,7 @@
 	}
 	
 	//4D OpenSimplex Noise.
-	double open_simplex_noise_eval4d(struct OpenSimplexNoise *open_simplex_noise, double x, double y, double z, double w) {
+	double open_simplex_noise_eval_4d(struct OpenSimplexNoise *open_simplex_noise, double x, double y, double z, double w) {
 	
 		//Place input coordinates on simplectic honeycomb.
 		double stretchOffset = (x + y + z + w) * STRETCH_CONSTANT_4D;
@@ -2098,6 +2098,6 @@
 		}
 
 		return value / NORM_CONSTANT_4D;
-	}*/
+	}
 
 #endif

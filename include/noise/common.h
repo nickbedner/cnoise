@@ -15,6 +15,7 @@ enum NoiseQuality
     QUALITY_BEST
 };
 
+#define SQRT_3 1.7320508075688772935
 #define X_NOISE_GEN 1619
 #define Y_NOISE_GEN 31337
 #define Z_NOISE_GEN 6971
@@ -64,7 +65,23 @@ static inline int fast_floor(double x)
     return x < xi ? xi - 1 : xi;
 }
 
-static inline double gradient_noise3d(double fx, double fy, double fz, int ix, int iy, int iz, int seed)
+static inline int int_value_noise_3d(int x, int y, int z, int seed)
+{
+    // All constants are primes and must remain prime in order for this noise
+    // function to work correctly.
+    int n = (X_NOISE_GEN * x + Y_NOISE_GEN * y + Z_NOISE_GEN * z + SEED_NOISE_GEN * seed) & 0x7fffffff;
+
+    n = (n >> 13) ^ n;
+
+    return (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff;
+}
+
+static inline double value_noise_3d(int x, int y, int z, int seed)
+{
+    return 1.0 - ((double)int_value_noise_3d(x, y, z, seed) / 1073741824.0);
+}
+
+static inline double gradient_noise_3d(double fx, double fy, double fz, int ix, int iy, int iz, int seed)
 {
     int vectorIndex = (X_NOISE_GEN * ix + Y_NOISE_GEN * iy + Z_NOISE_GEN * iz + SEED_NOISE_GEN * seed) & 0xffffffff;
 
@@ -82,7 +99,7 @@ static inline double gradient_noise3d(double fx, double fy, double fz, int ix, i
     return ((xvGradient * xvPoint) + (yvGradient * yvPoint) + (zvGradient * zvPoint)) * 2.12;
 }
 
-static inline double gradient_coherent_noise3d(double x, double y, double z, int seed, enum NoiseQuality noise_quality)
+static inline double gradient_coherent_noise_3d(double x, double y, double z, int seed, enum NoiseQuality noise_quality)
 {
     int x0 = (x > 0.0 ? (int)x : (int)x - 1);
     int x1 = x0 + 1;
@@ -112,18 +129,18 @@ static inline double gradient_coherent_noise3d(double x, double y, double z, int
     }
 
     double n0, n1, ix0, ix1, iy0, iy1;
-    n0 = gradient_noise3d(x, y, z, x0, y0, z0, seed);
-    n1 = gradient_noise3d(x, y, z, x1, y0, z0, seed);
+    n0 = gradient_noise_3d(x, y, z, x0, y0, z0, seed);
+    n1 = gradient_noise_3d(x, y, z, x1, y0, z0, seed);
     ix0 = linear_interp(n0, n1, xs);
-    n0 = gradient_noise3d(x, y, z, x0, y1, z0, seed);
-    n1 = gradient_noise3d(x, y, z, x1, y1, z0, seed);
+    n0 = gradient_noise_3d(x, y, z, x0, y1, z0, seed);
+    n1 = gradient_noise_3d(x, y, z, x1, y1, z0, seed);
     ix1 = linear_interp(n0, n1, xs);
     iy0 = linear_interp(ix0, ix1, ys);
-    n0 = gradient_noise3d(x, y, z, x0, y0, z1, seed);
-    n1 = gradient_noise3d(x, y, z, x1, y0, z1, seed);
+    n0 = gradient_noise_3d(x, y, z, x0, y0, z1, seed);
+    n1 = gradient_noise_3d(x, y, z, x1, y0, z1, seed);
     ix0 = linear_interp(n0, n1, xs);
-    n0 = gradient_noise3d(x, y, z, x0, y1, z1, seed);
-    n1 = gradient_noise3d(x, y, z, x1, y1, z1, seed);
+    n0 = gradient_noise_3d(x, y, z, x0, y1, z1, seed);
+    n1 = gradient_noise_3d(x, y, z, x1, y1, z1, seed);
     ix1 = linear_interp(n0, n1, xs);
     iy1 = linear_interp(ix0, ix1, ys);
 

@@ -7,7 +7,7 @@
 #define DEFAULT_PERLIN_FREQUENCY 1.0
 #define DEFAULT_PERLIN_LACUNARITY 2.0
 #define DEFAULT_PERLIN_PERSISTENCE 0.5
-#define DEFAULT_PERLIN_OCTAVE_COUNT 6
+#define DEFAULT_PERLIN_OCTAVE_COUNT 1
 #define DEFAULT_PERLIN_SEED 0
 #define DEFAULT_PERLIN_QUALITY QUALITY_STANDARD
 
@@ -31,7 +31,7 @@ void perlin_noise_init(struct PerlinNoise *perlin_noise)
     perlin_noise->noise_quality = DEFAULT_PERLIN_QUALITY;
 }
 
-double perlin_noise_eval3d(struct PerlinNoise *perlin_noise, double x, double y, double z)
+double perlin_noise_eval_3d(struct PerlinNoise *perlin_noise, double x, double y, double z)
 {
     double value = 0.0;
     double signal = 0.0;
@@ -50,7 +50,7 @@ double perlin_noise_eval3d(struct PerlinNoise *perlin_noise, double x, double y,
         nz = make_int_32_range(z);
 
         curSeed = (perlin_noise->seed + curOctave) & 0xffffffff;
-        signal = gradient_coherent_noise3d(nx, ny, nz, curSeed, perlin_noise->noise_quality);
+        signal = gradient_coherent_noise_3d(nx, ny, nz, curSeed, perlin_noise->noise_quality);
         value += signal * curPersistence;
 
         x *= perlin_noise->lacunarity;
