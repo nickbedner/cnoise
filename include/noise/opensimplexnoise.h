@@ -14,8 +14,9 @@
 #define NORM_CONSTANT_2D 47;
 #define NORM_CONSTANT_3D 103;
 #define NORM_CONSTANT_4D 30;
-	
-#define DEFAULT_SEED 0;
+
+// TODO: Add rest of parameters
+#define DEFAULT_SIMPLEX_SEED 0
 
 	//Gradients for 2D. They approximate the directions to the
 	//vertices of an octagon from the center.
@@ -67,6 +68,7 @@
 	struct OpenSimplexNoise {
 		unsigned char perm[256];
 		short permGradIndex3D[256];
+		int seed;
 	};
 
 	static inline double open_simplex_noise_extrapolate2d(struct OpenSimplexNoise *open_simplex_noise, int xsb, int ysb, double dx, double dy)
@@ -87,10 +89,8 @@
 		return gradients4D[index] * dx + gradients4D[index + 1] * dy + gradients4D[index + 2] * dz + gradients4D[index + 3] * dw;
 	}
 
-	//Initializes the class using a permutation array generated from a 64-bit seed.
-	//Generates a proper permutation (i.e. doesn't merely perform N successive pair swaps on a base array)
-	//Uses a simple 64-bit LCG.
-	void open_simplex_noise_init(struct OpenSimplexNoise *open_simplex_noise, long seed) {
+	static void open_simplex_noise_set_seed(struct OpenSimplexNoise *open_simplex_noise, long seed)
+	{
 		short source[256];
 		for (short i = 0; i < 256; i++)
 			source[i] = i;
@@ -109,9 +109,19 @@
 			source[r] = source[i];
 		}
 	}
+
+	//Initializes the class using a permutation array generated from a 64-bit seed.
+	//Generates a proper permutation (i.e. doesn't merely perform N successive pair swaps on a base array)
+	//Uses a simple 64-bit LCG.
+	void open_simplex_noise_init(struct OpenSimplexNoise *open_simplex_noise)
+	{
+		open_simplex_noise->seed = DEFAULT_SIMPLEX_SEED;
+		open_simplex_noise_set_seed(open_simplex_noise, open_simplex_noise->seed);
+	}
 	
 	//2D OpenSimplex Noise.
-	double open_simplex_noise_eval_2d(struct OpenSimplexNoise *open_simplex_noise, double x, double y) {
+	double open_simplex_noise_eval_2d(struct OpenSimplexNoise *open_simplex_noise, double x, double y)
+	{
 	
 		//Place input coordinates onto grid.
 		double stretchOffset = (x + y) * STRETCH_CONSTANT_2D;

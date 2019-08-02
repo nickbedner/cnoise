@@ -7,5 +7,6 @@
 #include "ridgedfractalnoise.h"
 #include "voronoinoise.h"
 #include "whitenoise.h"
+#include "billownoise.h"
 
 #endif
