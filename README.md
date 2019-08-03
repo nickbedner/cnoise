@@ -11,10 +11,10 @@ Perlin Noise<br/>
 Ridged Fractal Noise<br/>
 Open Simplex Noise<br/>
 Voronoi Noise<br/>
+White Noise<br/>
 
 ### In Progress
 
-White Noise<br/>
 
 ### Planned
 
