@@ -3,6 +3,7 @@
 #define OPEN_SIMPLEX_H
 
 #include "common.h"
+#include "stdbool.h"
 
 #define STRETCH_CONSTANT_2D -0.211324865405187;    //(1/Math.sqrt(2+1)-1)/2;
 #define SQUISH_CONSTANT_2D 0.366025403784439;      //(Math.sqrt(2+1)-1)/2;

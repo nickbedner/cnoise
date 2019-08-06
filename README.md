@@ -19,7 +19,6 @@ White Noise<br/>
 
 ### In Progress
 
-
 ### Planned
 
 GLSL implementations<br/>
