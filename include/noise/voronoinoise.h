@@ -17,7 +17,7 @@ struct VoronoiNoise
     unsigned char enable_distance;
 };
 
-void voronoi_noise_init(struct VoronoiNoise *voronoi_noise)
+static inline void voronoi_noise_init(struct VoronoiNoise *voronoi_noise)
 {
     voronoi_noise->frequency = DEFAULT_VORONOI_FREQUENCY;
     voronoi_noise->displacement = DEFAULT_VORONOI_DISPLACEMENT;
@@ -75,9 +75,7 @@ static inline double voronoi_noise_eval_3d(struct VoronoiNoise *voronoi_noise, d
         value = (sqrt(xDist * xDist + yDist * yDist + zDist * zDist)) * SQRT_3 - 1.0;
     }
     else
-    {
         value = 0.0;
-    }
 
     return value + (voronoi_noise->displacement * (double)value_noise_3d(fast_floor(xCandidate), fast_floor(yCandidate), fast_floor(zCandidate), voronoi_noise->seed));
 }

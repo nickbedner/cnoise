@@ -89,7 +89,7 @@
 		return gradients4D[index] * dx + gradients4D[index + 1] * dy + gradients4D[index + 2] * dz + gradients4D[index + 3] * dw;
 	}
 
-	static void open_simplex_noise_set_seed(struct OpenSimplexNoise *open_simplex_noise, long seed)
+	static inline void open_simplex_noise_set_seed(struct OpenSimplexNoise *open_simplex_noise, long seed)
 	{
 		short source[256];
 		for (short i = 0; i < 256; i++)
@@ -113,14 +113,14 @@
 	//Initializes the class using a permutation array generated from a 64-bit seed.
 	//Generates a proper permutation (i.e. doesn't merely perform N successive pair swaps on a base array)
 	//Uses a simple 64-bit LCG.
-	void open_simplex_noise_init(struct OpenSimplexNoise *open_simplex_noise)
+	static inline void open_simplex_noise_init(struct OpenSimplexNoise *open_simplex_noise)
 	{
 		open_simplex_noise->seed = DEFAULT_SIMPLEX_SEED;
 		open_simplex_noise_set_seed(open_simplex_noise, open_simplex_noise->seed);
 	}
 	
 	//2D OpenSimplex Noise.
-	double open_simplex_noise_eval_2d(struct OpenSimplexNoise *open_simplex_noise, double x, double y)
+	static inline double open_simplex_noise_eval_2d(struct OpenSimplexNoise *open_simplex_noise, double x, double y)
 	{
 	
 		//Place input coordinates onto grid.
@@ -236,7 +236,7 @@
 	}
 	
 	//3D OpenSimplex Noise.
-	double open_simplex_noise_eval_3d(struct OpenSimplexNoise *open_simplex_noise, double x, double y, double z) {
+	static inline double open_simplex_noise_eval_3d(struct OpenSimplexNoise *open_simplex_noise, double x, double y, double z) {
 	
 		//Place input coordinates on simplectic honeycomb.
 		double stretchOffset = (x + y + z) * STRETCH_CONSTANT_3D;
@@ -797,7 +797,7 @@
 	}
 	
 	//4D OpenSimplex Noise.
-	double open_simplex_noise_eval_4d(struct OpenSimplexNoise *open_simplex_noise, double x, double y, double z, double w) {
+	static inline double open_simplex_noise_eval_4d(struct OpenSimplexNoise *open_simplex_noise, double x, double y, double z, double w) {
 	
 		//Place input coordinates on simplectic honeycomb.
 		double stretchOffset = (x + y + z + w) * STRETCH_CONSTANT_4D;

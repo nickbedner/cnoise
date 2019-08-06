@@ -21,7 +21,7 @@ struct PerlinNoise
     enum NoiseQuality noise_quality;
 };
 
-void perlin_noise_init(struct PerlinNoise *perlin_noise)
+static inline void perlin_noise_init(struct PerlinNoise *perlin_noise)
 {
     perlin_noise->frequency = DEFAULT_PERLIN_FREQUENCY;
     perlin_noise->lacunarity = DEFAULT_PERLIN_LACUNARITY;
@@ -31,7 +31,7 @@ void perlin_noise_init(struct PerlinNoise *perlin_noise)
     perlin_noise->noise_quality = DEFAULT_PERLIN_QUALITY;
 }
 
-double perlin_noise_eval_3d(struct PerlinNoise *perlin_noise, double x, double y, double z)
+static inline double perlin_noise_eval_3d(struct PerlinNoise *perlin_noise, double x, double y, double z)
 {
     double value = 0.0;
     double signal = 0.0;

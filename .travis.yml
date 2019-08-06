@@ -1,0 +1,6 @@
+language: c
+sudo: false
+script:
+  - cd src
+  - clang test.c -o test
+  - ./test

@@ -21,7 +21,7 @@ struct BillowNoise
     enum NoiseQuality noise_quality;
 };
 
-void billow_noise_init(struct BillowNoise *billow_noise)
+static inline void billow_noise_init(struct BillowNoise *billow_noise)
 {
     billow_noise->frequency = DEFAULT_BILLOW_FREQUENCY;
     billow_noise->lacunarity = DEFAULT_BILLOW_LACUNARITY;
@@ -31,7 +31,7 @@ void billow_noise_init(struct BillowNoise *billow_noise)
     billow_noise->noise_quality = DEFAULT_BILLOW_QUALITY;
 }
 
-double billow_noise_eval_3d(struct BillowNoise *billow_noise, double x, double y, double z)
+static inline double billow_noise_eval_3d(struct BillowNoise *billow_noise, double x, double y, double z)
 {
     double value = 0.0;
     double signal = 0.0;

@@ -33,7 +33,7 @@ static inline void ridged_fractal_noise_calc_spectral_weights(struct RidgedFract
     }
 }
 
-void ridged_fractal_noise_init(struct RidgedFractalNoise *ridged_fractal_noise)
+static inline void ridged_fractal_noise_init(struct RidgedFractalNoise *ridged_fractal_noise)
 {
     ridged_fractal_noise->frequency = DEFAULT_RIDGED_FREQUENCY;
     ridged_fractal_noise->lacunarity = DEFAULT_RIDGED_LACUNARITY;
@@ -44,7 +44,7 @@ void ridged_fractal_noise_init(struct RidgedFractalNoise *ridged_fractal_noise)
     ridged_fractal_noise_calc_spectral_weights(ridged_fractal_noise);
 }
 
-double ridged_fractal_noise_eval_3d(struct RidgedFractalNoise *ridged_fractal_noise, double x, double y, double z)
+static inline double ridged_fractal_noise_eval_3d(struct RidgedFractalNoise *ridged_fractal_noise, double x, double y, double z)
 {
     x *= ridged_fractal_noise->frequency;
     y *= ridged_fractal_noise->frequency;
