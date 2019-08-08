@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include <math.h>
 
-int open_simplex_noise_test();
-
 int main(int argc, char *argv[])
 {
     struct PerlinNoise perlin_noise;
@@ -40,7 +38,7 @@ int main(int argc, char *argv[])
     open_simplex_noise_init(&open_simplex_noise);
 
     for (int loop_num = 0; loop_num < 10; loop_num++)
-        printf("Value from Open Simplex noise: %f\n", open_simplex_noise_eval_2d(&open_simplex_noise, cos(loop_num), sin(loop_num)));
+        printf("Value from Open Simplex noise: %f\n", open_simplex_noise_eval_3d(&open_simplex_noise, cos(loop_num), sin(loop_num), tan(loop_num)));
 
     return 0;
 }
