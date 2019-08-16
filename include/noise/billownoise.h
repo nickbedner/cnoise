@@ -13,9 +13,9 @@
 
 struct BillowNoise
 {
-    double frequency;
-    double lacunarity;
-    double persistence;
+    float frequency;
+    float lacunarity;
+    float persistence;
     unsigned char octave_count;
     int seed;
     enum NoiseQuality noise_quality;
@@ -31,33 +31,33 @@ static inline void billow_noise_init(struct BillowNoise *billow_noise)
     billow_noise->noise_quality = DEFAULT_BILLOW_QUALITY;
 }
 
-static inline double billow_noise_eval_3d(struct BillowNoise *billow_noise, double x, double y, double z)
+static inline float billow_noise_eval_3d(struct BillowNoise *billow_noise, float x, float y, float z)
 {
-    double value = 0.0;
-    double signal = 0.0;
-    double curPersistence = 1.0;
-    double nx, ny, nz;
+    float value = 0.0;
+    float signal = 0.0;
+    float cur_persistence = 1.0;
+    float nx, ny, nz;
     int curSeed;
 
     x *= billow_noise->frequency;
     y *= billow_noise->frequency;
     z *= billow_noise->frequency;
 
-    for (int curOctave = 0; curOctave < billow_noise->octave_count; curOctave++)
+    for (int cur_octave = 0; cur_octave < billow_noise->octave_count; cur_octave++)
     {
         nx = make_int_32_range(x);
         ny = make_int_32_range(y);
         nz = make_int_32_range(z);
 
-        curSeed = (billow_noise->seed + curOctave) & 0xffffffff;
+        curSeed = (billow_noise->seed + cur_octave) & 0xffffffff;
         signal = gradient_coherent_noise_3d(nx, ny, nz, curSeed, billow_noise->noise_quality);
         signal = 2.0 * fabs(signal) - 1.0;
-        value += signal * curPersistence;
+        value += signal * cur_persistence;
 
         x *= billow_noise->lacunarity;
         y *= billow_noise->lacunarity;
         z *= billow_noise->lacunarity;
-        curPersistence *= billow_noise->persistence;
+        cur_persistence *= billow_noise->persistence;
     }
 
     value += 0.5;

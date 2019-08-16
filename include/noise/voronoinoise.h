@@ -11,8 +11,8 @@
 
 struct VoronoiNoise
 {
-    double frequency;
-    double displacement;
+    float frequency;
+    float displacement;
     int seed;
     unsigned char enable_distance;
 };
@@ -25,59 +25,58 @@ static inline void voronoi_noise_init(struct VoronoiNoise *voronoi_noise)
     voronoi_noise->enable_distance = DEFAULT_VORONOI_ENABLE_DISTANCE;
 }
 
-static inline double voronoi_noise_eval_3d(struct VoronoiNoise *voronoi_noise, double x, double y, double z)
+static inline float voronoi_noise_eval_3d(struct VoronoiNoise *voronoi_noise, float x, float y, float z)
 {
     x *= voronoi_noise->frequency;
     y *= voronoi_noise->frequency;
     z *= voronoi_noise->frequency;
 
-    int xInt = (x > 0.0 ? (int)x : (int)x - 1);
-    int yInt = (y > 0.0 ? (int)y : (int)y - 1);
-    int zInt = (z > 0.0 ? (int)z : (int)z - 1);
+    int x_int = (x > 0.0 ? (int)x : (int)x - 1);
+    int y_int = (y > 0.0 ? (int)y : (int)y - 1);
+    int z_int = (z > 0.0 ? (int)z : (int)z - 1);
 
-    double minDist = 2147483647.0;
-    double xCandidate = 0;
-    double yCandidate = 0;
-    double zCandidate = 0;
+    float min_dist = 2147483647.0;
+    float x_candidate = 0;
+    float y_candidate = 0;
+    float z_candidate = 0;
 
-    for (int zCur = zInt - 2; zCur <= zInt + 2; zCur++)
+    for (int z_cur = z_int - 2; z_cur <= z_int + 2; z_cur++)
     {
-        for (int yCur = yInt - 2; yCur <= yInt + 2; yCur++)
+        for (int y_cur = y_int - 2; y_cur <= y_int + 2; y_cur++)
         {
-            for (int xCur = xInt - 2; xCur <= xInt + 2; xCur++)
+            for (int x_cur = x_int - 2; x_cur <= x_int + 2; x_cur++)
             {
-                double xPos = xCur + value_noise_3d(xCur, yCur, zCur, voronoi_noise->seed);
-                double yPos = yCur + value_noise_3d(xCur, yCur, zCur, voronoi_noise->seed + 1);
-                double zPos = zCur + value_noise_3d(xCur, yCur, zCur, voronoi_noise->seed + 2);
-                double xDist = xPos - x;
-                double yDist = yPos - y;
-                double zDist = zPos - z;
-                double dist = xDist * xDist + yDist * yDist + zDist * zDist;
+                float x_pos = x_cur + value_noise_3d(x_cur, y_cur, z_cur, voronoi_noise->seed);
+                float y_pos = y_cur + value_noise_3d(x_cur, y_cur, z_cur, voronoi_noise->seed + 1);
+                float z_pos = z_cur + value_noise_3d(x_cur, y_cur, z_cur, voronoi_noise->seed + 2);
+                float x_dist = x_pos - x;
+                float y_dist = y_pos - y;
+                float z_dist = z_pos - z;
+                float dist = x_dist * x_dist + y_dist * y_dist + z_dist * z_dist;
 
-                if (dist < minDist)
+                if (dist < min_dist)
                 {
-                    minDist = dist;
-                    xCandidate = xPos;
-                    yCandidate = yPos;
-                    zCandidate = zPos;
+                    min_dist = dist;
+                    x_candidate = x_pos;
+                    y_candidate = y_pos;
+                    z_candidate = z_pos;
                 }
             }
         }
     }
 
-    double value;
+    float value;
     if (voronoi_noise->enable_distance)
     {
-        // Determine the distance to the nearest seed point.
-        double xDist = xCandidate - x;
-        double yDist = yCandidate - y;
-        double zDist = zCandidate - z;
-        value = (sqrt(xDist * xDist + yDist * yDist + zDist * zDist)) * SQRT_3 - 1.0;
+        float x_dist = x_candidate - x;
+        float y_dist = y_candidate - y;
+        float z_dist = z_candidate - z;
+        value = (sqrt(x_dist * x_dist + y_dist * y_dist + z_dist * z_dist)) * SQRT_3 - 1.0;
     }
     else
         value = 0.0;
 
-    return value + (voronoi_noise->displacement * (double)value_noise_3d(fast_floor(xCandidate), fast_floor(yCandidate), fast_floor(zCandidate), voronoi_noise->seed));
+    return value + (voronoi_noise->displacement * (float)value_noise_3d(fast_floor(x_candidate), fast_floor(y_candidate), fast_floor(z_candidate), voronoi_noise->seed));
 }
 
 #endif
