@@ -147,4 +147,52 @@ static inline float gradient_coherent_noise_3d(float x, float y, float z, int se
     return linear_interp(iy0, iy1, zs);
 }
 
+static inline float gradient_coherent_noise_3d_vec_256(float x, float y, float z, int seed, enum NoiseQuality noise_quality)
+{
+    int x0 = (x > 0.0 ? (int)x : (int)x - 1);
+    int x1 = x0 + 1;
+    int y0 = (y > 0.0 ? (int)y : (int)y - 1);
+    int y1 = y0 + 1;
+    int z0 = (z > 0.0 ? (int)z : (int)z - 1);
+    int z1 = z0 + 1;
+
+    float xs = 0, ys = 0, zs = 0;
+    switch (noise_quality)
+    {
+    case QUALITY_FAST:
+        xs = (x - (float)x0);
+        ys = (y - (float)y0);
+        zs = (z - (float)z0);
+        break;
+    case QUALITY_STANDARD:
+        xs = s_curve3(x - (float)x0);
+        ys = s_curve3(y - (float)y0);
+        zs = s_curve3(z - (float)z0);
+        break;
+    case QUALITY_BEST:
+        xs = s_curve5(x - (float)x0);
+        ys = s_curve5(y - (float)y0);
+        zs = s_curve5(z - (float)z0);
+        break;
+    }
+
+    float n0, n1, ix0, ix1, iy0, iy1;
+    n0 = gradient_noise_3d(x, y, z, x0, y0, z0, seed);
+    n1 = gradient_noise_3d(x, y, z, x1, y0, z0, seed);
+    ix0 = linear_interp(n0, n1, xs);
+    n0 = gradient_noise_3d(x, y, z, x0, y1, z0, seed);
+    n1 = gradient_noise_3d(x, y, z, x1, y1, z0, seed);
+    ix1 = linear_interp(n0, n1, xs);
+    iy0 = linear_interp(ix0, ix1, ys);
+    n0 = gradient_noise_3d(x, y, z, x0, y0, z1, seed);
+    n1 = gradient_noise_3d(x, y, z, x1, y0, z1, seed);
+    ix0 = linear_interp(n0, n1, xs);
+    n0 = gradient_noise_3d(x, y, z, x0, y1, z1, seed);
+    n1 = gradient_noise_3d(x, y, z, x1, y1, z1, seed);
+    ix1 = linear_interp(n0, n1, xs);
+    iy1 = linear_interp(ix0, ix1, ys);
+
+    return linear_interp(iy0, iy1, zs);
+}
+
 #endif
