@@ -23,4 +23,5 @@ SIMD Perlin Noise
 
 ### Planned
 
+Hydraulic Noise
 GLSL implementations<br/>
