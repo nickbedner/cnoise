@@ -19,9 +19,9 @@ White Noise<br/>
 
 ### In Progress
 
-SIMD Perlin Noise
+SIMD Perlin Noise<br/>
 
 ### Planned
 
-Hydraulic Noise
+Hydraulic Noise<br/>
 GLSL implementations<br/>
