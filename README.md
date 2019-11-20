@@ -4,7 +4,7 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/c41a5345402f4831a1f09af4f2961b74)](https://www.codacy.com/app/Zalrioth/data-structures-in-c?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Zalrioth/data-structures-in-c&amp;utm_campaign=Badge_Grade)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-C port of libnoise with AVX2 SIMD and extras. Future plans for GLSL.
+Header only C port of libnoise with SIMD and extras. Future plans for GLSL.
 
 ## Settings up a Project
 
@@ -19,9 +19,14 @@ White Noise<br/>
 
 ### In Progress
 
-SIMD Perlin Noise<br/>
+AVX2<br/>
+Benchmarks<br/>
+Doc<br/>
 
 ### Planned
 
+Auto detect best instruction set<br/>
+ARM Neon<br/>
+AVX-512<br/>
 Hydraulic Noise<br/>
 GLSL implementations<br/>
