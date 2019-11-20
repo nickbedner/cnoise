@@ -81,6 +81,8 @@ static inline void perlin_noise_eval_3d_vec_256(struct PerlinNoise *perlin_noise
         z_vec = z_vec * perlin_noise->frequency;
 
         for (int cur_octave = 0; cur_octave < perlin_noise->octave_count; cur_octave++) {
+          // Note: Don't need this only need to check first and final
+          // Check first and last if good continue else make in range
           make_int_32_range_vec_256(&nx, x_vec);
           ny = make_int_32_range(y_vec);
           nz = make_int_32_range(z_vec);
@@ -98,6 +100,7 @@ static inline void perlin_noise_eval_3d_vec_256(struct PerlinNoise *perlin_noise
           cur_persistence = cur_persistence * perlin_noise->persistence;
         }
 
+        //TODO: Could be faster
         //_mm256_store_ps(values, value);
         memcpy(values + (x_dim + (y_dim * x_size) + (z_dim * (x_size * y_size))), (float *)&value, sizeof(__m256));
         //_mm256_store_ps(values + (x_dim + (y_dim * y_size) + (z_dim * (x_size * y_size))), value);
