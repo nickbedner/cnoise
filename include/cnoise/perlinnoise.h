@@ -58,11 +58,12 @@ static inline float perlin_noise_eval_3d(struct PerlinNoise *perlin_noise, float
   return value;
 }
 
-// Note: Dimension x must be multiple of 8 for SIMD to work properly
+// Note: Every other value seems to be working and reversed
+// TODO: Add scale for noise sample
 static inline void perlin_noise_eval_3d_vec_256(struct PerlinNoise *perlin_noise, float *values, float x, float y, float z, size_t x_size, size_t y_size, size_t z_size) {
-  for (int x_dim = 0; x_dim < x_size; x_dim += 8) {
+  for (int z_dim = 0; z_dim < z_size; z_dim++) {
     for (int y_dim = 0; y_dim < y_size; y_dim++) {
-      for (int z_dim = 0; z_dim < z_size; z_dim++) {
+      for (int x_dim = 0; x_dim < x_size; x_dim += 8) {
         __m256 value = _mm256_set1_ps(0.0);
         __m256 signal = _mm256_set1_ps(0.0);
         float cur_persistence = 1.0;
@@ -75,8 +76,7 @@ static inline void perlin_noise_eval_3d_vec_256(struct PerlinNoise *perlin_noise
         float y_vec = (y + y_dim) / y_size;
         float z_vec = (z + z_dim) / z_size;
 
-        const __m256 frequency_scalar = _mm256_set1_ps(perlin_noise->frequency);
-        x_vec = _mm256_mul_ps(x_vec, frequency_scalar);
+        x_vec = _mm256_mul_ps(x_vec, _mm256_set1_ps(perlin_noise->frequency));
         y_vec = y_vec * perlin_noise->frequency;
         z_vec = z_vec * perlin_noise->frequency;
 
@@ -103,7 +103,7 @@ static inline void perlin_noise_eval_3d_vec_256(struct PerlinNoise *perlin_noise
         //TODO: Could be faster
         //_mm256_store_ps(values, value);
         memcpy(values + (x_dim + (y_dim * x_size) + (z_dim * (x_size * y_size))), (float *)&value, sizeof(__m256));
-        //_mm256_store_ps(values + (x_dim + (y_dim * y_size) + (z_dim * (x_size * y_size))), value);
+        //_mm256_store_ps(values + (x_dim + (y_dim * x_size) + (z_dim * (x_size * y_size))), value);
         //memcpy(values + (x_dim + (y_dim * y_size) + (z_dim * (x_size * y_size))), &value, sizeof(__m256));
       }
     }

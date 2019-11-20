@@ -5,6 +5,7 @@
 #include <immintrin.h>
 #include <math.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -131,10 +132,19 @@ static inline void gradient_noise_3d_vec_256(__m256* val, __m256 fx, float fy, f
   vector_index = _mm256_xor_si256(vector_index, _mm256_srlv_epi32(vector_index, _mm256_set1_epi32(SHIFT_NOISE_GEN)));
   vector_index = _mm256_and_si256(vector_index, _mm256_set1_epi32(0xff));
 
+  printf("Extracted value: %d\n", _mm256_extract_epi32(vector_index, 0));
+  printf("Extracted value: %d\n", _mm256_extract_epi32(vector_index, 1));
+  printf("Extracted value: %d\n", _mm256_extract_epi32(vector_index, 2));
+  printf("Extracted value: %d\n", _mm256_extract_epi32(vector_index, 3));
+  printf("Extracted value: %d\n", _mm256_extract_epi32(vector_index, 4));
+  printf("Extracted value: %d\n", _mm256_extract_epi32(vector_index, 5));
+  printf("Extracted value: %d\n", _mm256_extract_epi32(vector_index, 6));
+  printf("Extracted value: %d\n", _mm256_extract_epi32(vector_index, 7));
+
   // TODO: Probably better and faster way to do this
-  __m256 xv_gradient = _mm256_set_ps(random_vectors[_mm256_extract_epi32(vector_index, 0)][0], random_vectors[_mm256_extract_epi32(vector_index, 1)][0], random_vectors[_mm256_extract_epi32(vector_index, 2)][0], random_vectors[_mm256_extract_epi32(vector_index, 3)][0], random_vectors[_mm256_extract_epi32(vector_index, 4)][0], random_vectors[_mm256_extract_epi32(vector_index, 5)][0], random_vectors[_mm256_extract_epi32(vector_index, 6)][0], random_vectors[_mm256_extract_epi32(vector_index, 7)][0]);
-  __m256 yv_gradient = _mm256_set_ps(random_vectors[_mm256_extract_epi32(vector_index, 0)][1], random_vectors[_mm256_extract_epi32(vector_index, 1)][1], random_vectors[_mm256_extract_epi32(vector_index, 2)][1], random_vectors[_mm256_extract_epi32(vector_index, 3)][1], random_vectors[_mm256_extract_epi32(vector_index, 4)][1], random_vectors[_mm256_extract_epi32(vector_index, 5)][1], random_vectors[_mm256_extract_epi32(vector_index, 6)][1], random_vectors[_mm256_extract_epi32(vector_index, 7)][1]);
-  __m256 zv_gradient = _mm256_set_ps(random_vectors[_mm256_extract_epi32(vector_index, 0)][2], random_vectors[_mm256_extract_epi32(vector_index, 1)][2], random_vectors[_mm256_extract_epi32(vector_index, 2)][2], random_vectors[_mm256_extract_epi32(vector_index, 3)][2], random_vectors[_mm256_extract_epi32(vector_index, 4)][2], random_vectors[_mm256_extract_epi32(vector_index, 5)][2], random_vectors[_mm256_extract_epi32(vector_index, 6)][2], random_vectors[_mm256_extract_epi32(vector_index, 7)][2]);
+  __m256 xv_gradient = _mm256_set_ps(random_vectors[_mm256_extract_epi32(vector_index, 7)][0], random_vectors[_mm256_extract_epi32(vector_index, 6)][0], random_vectors[_mm256_extract_epi32(vector_index, 5)][0], random_vectors[_mm256_extract_epi32(vector_index, 4)][0], random_vectors[_mm256_extract_epi32(vector_index, 3)][0], random_vectors[_mm256_extract_epi32(vector_index, 2)][0], random_vectors[_mm256_extract_epi32(vector_index, 1)][0], random_vectors[_mm256_extract_epi32(vector_index, 0)][0]);
+  __m256 yv_gradient = _mm256_set_ps(random_vectors[_mm256_extract_epi32(vector_index, 7)][1], random_vectors[_mm256_extract_epi32(vector_index, 6)][1], random_vectors[_mm256_extract_epi32(vector_index, 5)][1], random_vectors[_mm256_extract_epi32(vector_index, 4)][1], random_vectors[_mm256_extract_epi32(vector_index, 3)][1], random_vectors[_mm256_extract_epi32(vector_index, 2)][1], random_vectors[_mm256_extract_epi32(vector_index, 1)][1], random_vectors[_mm256_extract_epi32(vector_index, 0)][1]);
+  __m256 zv_gradient = _mm256_set_ps(random_vectors[_mm256_extract_epi32(vector_index, 7)][2], random_vectors[_mm256_extract_epi32(vector_index, 6)][2], random_vectors[_mm256_extract_epi32(vector_index, 5)][2], random_vectors[_mm256_extract_epi32(vector_index, 4)][2], random_vectors[_mm256_extract_epi32(vector_index, 3)][2], random_vectors[_mm256_extract_epi32(vector_index, 2)][2], random_vectors[_mm256_extract_epi32(vector_index, 1)][2], random_vectors[_mm256_extract_epi32(vector_index, 0)][2]);
 
   __m256 xv_point = _mm256_sub_ps(fx, _mm256_cvtepi32_ps(ix));
   float yv_point = (fy - (float)iy);
@@ -144,7 +154,9 @@ static inline void gradient_noise_3d_vec_256(__m256* val, __m256 fx, float fy, f
 }
 
 static inline float gradient_coherent_noise_3d(float x, float y, float z, int seed, enum NoiseQuality noise_quality) {
-  int x0 = (x > 0.0 ? (int)x : (int)x - 1);
+  //int x0 = (x > 0.0 ? (int)x : (int)x - 1);
+  //int x1 = x0 + 1;
+  int x0 = (int)round((x > 0.0 ? x : x - 1));
   int x1 = x0 + 1;
   int y0 = (y > 0.0 ? (int)y : (int)y - 1);
   int y1 = y0 + 1;
@@ -192,10 +204,17 @@ static inline float gradient_coherent_noise_3d(float x, float y, float z, int se
 static inline void gradient_coherent_noise_3d_vec_256(__m256* signal, __m256 x, float y, float z, int seed, enum NoiseQuality noise_quality) {
   //int x0 = (x > 0.0 ? (int)x : (int)x - 1);
   //int x1 = x0 + 1;
-  __m256 mask_normal = _mm256_cmp_ps(x, _mm256_setzero_ps(), _CMP_GT_OQ);
-  __m256 x0_float = _mm256_blendv_ps(x, _mm256_sub_ps(x, _mm256_set1_ps(1.0)), mask_normal);
-  __m256i x0 = _mm256_cvtps_epi32(x0_float);
+  // Problem: _mm256_cvtps_epi32 rounds up
+  __m256i x0 = _mm256_cvtps_epi32(_mm256_blendv_ps(_mm256_sub_ps(x, _mm256_set1_ps(1.0)), x, _mm256_cmp_ps(x, _mm256_setzero_ps(), _CMP_GT_OQ)));
   __m256i x1 = _mm256_add_epi32(x0, _mm256_set1_epi32(1));
+  printf("Extracted value: %d\n", _mm256_extract_epi32(x0, 0));
+  printf("Extracted value: %d\n", _mm256_extract_epi32(x0, 1));
+  printf("Extracted value: %d\n", _mm256_extract_epi32(x0, 2));
+  printf("Extracted value: %d\n", _mm256_extract_epi32(x0, 3));
+  printf("Extracted value: %d\n", _mm256_extract_epi32(x0, 4));
+  printf("Extracted value: %d\n", _mm256_extract_epi32(x0, 5));
+  printf("Extracted value: %d\n", _mm256_extract_epi32(x0, 6));
+  printf("Extracted value: %d\n", _mm256_extract_epi32(x0, 7));
   int y0 = (y > 0.0 ? (int)y : (int)y - 1);
   int y1 = y0 + 1;
   int z0 = (z > 0.0 ? (int)z : (int)z - 1);
