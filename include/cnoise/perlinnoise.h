@@ -98,7 +98,9 @@ static inline void perlin_noise_eval_3d_vec_256(struct PerlinNoise *perlin_noise
           cur_persistence = cur_persistence * perlin_noise->persistence;
         }
 
-        _mm256_store_ps(values + (x_dim + (y_dim * y_size) + (z_dim * (x_size * y_size))), value);
+        //_mm256_store_ps(values, value);
+        memcpy(values + (x_dim + (y_dim * x_size) + (z_dim * (x_size * y_size))), (float *)&value, sizeof(__m256));
+        //_mm256_store_ps(values + (x_dim + (y_dim * y_size) + (z_dim * (x_size * y_size))), value);
         //memcpy(values + (x_dim + (y_dim * y_size) + (z_dim * (x_size * y_size))), &value, sizeof(__m256));
       }
     }

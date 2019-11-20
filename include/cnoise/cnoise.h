@@ -1,12 +1,12 @@
 #pragma once
-#ifndef NOISE_H
-#define NOISE_H
+#ifndef CNOISE_H
+#define CNOISE_H
 
+#include "billownoise.h"
 #include "opensimplexnoise.h"
 #include "perlinnoise.h"
 #include "ridgedfractalnoise.h"
 #include "voronoinoise.h"
 #include "whitenoise.h"
-#include "billownoise.h"
 
 #endif
