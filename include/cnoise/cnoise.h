@@ -9,4 +9,4 @@
 #include "voronoinoise.h"
 #include "whitenoise.h"
 
-#endif
+#endif  // CNOISE_H

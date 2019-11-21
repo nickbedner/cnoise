@@ -2111,4 +2111,4 @@
 		return value / NORM_CONSTANT_4D;
 	}
 
-#endif
+#endif // OPEN_SIMPLEX_H
