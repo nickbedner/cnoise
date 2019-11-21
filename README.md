@@ -12,10 +12,10 @@ Include the cnoise header and you're good to go
 
 ### Implemented
 
-Auto detect best instruction set at runtime<br/>
 Billow Noise<br/>
 Perlin Noise<br/>
 Ridged Fractal Noise<br/>
+Runtime instruction select<br/>
 Open Simplex Noise<br/>
 Voronoi Noise<br/>
 White Noise<br/>
