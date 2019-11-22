@@ -8,7 +8,7 @@ Header only C noise library with SIMD, multithreading, and more. Will automatica
 
 ## Settings up a Project
 
-Include the cnoise header and you're good to go. OpenMP required for multithreading support but can still work without it.
+Include the cnoise header and you're good to go. OpenMP required for multithreading support but can work without it.
 
 ### Implemented
 

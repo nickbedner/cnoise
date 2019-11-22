@@ -19,5 +19,7 @@ int main(int argc, char* argv[]) {
     }
   }
 
+  noise_free(data);
+
   return 0;
 }
