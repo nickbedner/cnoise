@@ -4,11 +4,11 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/cec66d7aa0304d15ade4ac7b8a0aff95)](https://www.codacy.com/manual/Zalrioth/cnoise?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Zalrioth/cnoise&amp;utm_campaign=Badge_Grade)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Header only C port of libnoise with SIMD, multithreading, and extras. Will automatically select the best instruction set to use at runtime.
+Header only C noise library with SIMD, multithreading, and more. Will automatically select the best instruction set to use at runtime. Based on libnoise and FastNoise
 
 ## Settings up a Project
 
-Include the cnoise header and you're good to go
+Include the cnoise header and you're good to go. OpenMP required for multithreading support but can still work without it.
 
 ### Implemented
 
@@ -16,7 +16,6 @@ Billow Noise<br/>
 Perlin Noise<br/>
 Ridged Fractal Noise<br/>
 Runtime instruction select<br/>
-Open Simplex Noise<br/>
 Voronoi Noise<br/>
 White Noise<br/>
 
@@ -33,5 +32,6 @@ AVX<br/>
 AVX-512F<br/>
 Hydraulic Noise<br/>
 GLSL implementations<br/>
+Open Simplex Noise<br/>
 SSE2<br/>
 SSE4.1<br/>
