@@ -1,6 +1,6 @@
 language: c
 sudo: false
 script:
-  - cd src
-  - clang test.c -o test -lm
-  - ./test
+  - cd examples
+  - clang hellonoise.c -o hellonoise -lm
+  - ./hellonoise

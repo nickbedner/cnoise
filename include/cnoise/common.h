@@ -45,6 +45,12 @@ enum SIMDType {
   SIMD_AVX512F = 5
 };
 
+static inline void noise_free(float* data) {
+#ifdef _WIN32
+  _aligned_free(data);
+#endif
+}
+
 static inline int detect_simd_support() {
   bool sse2_supported = false;
   bool sse4_1_supported = false;
@@ -212,11 +218,11 @@ static inline void gradient_noise_3d_vec_256(__m256* val, __m256 fx, float fy, f
 }
 
 static inline float gradient_coherent_noise_3d(float x, float y, float z, int seed, enum NoiseQuality noise_quality) {
-  //int x0 = (x > 0.0 ? (int)x : (int)x - 1);
-  //int x1 = x0 + 1;
-  //int x0 = (int)round((x > 0.0 ? x : x - 1));
-  int x0 = 1;
+  int x0 = (x > 0.0 ? (int)x : (int)x - 1);
   int x1 = x0 + 1;
+  //int x0 = (int)round((x > 0.0 ? x : x - 1));
+  //int x0 = 1;
+  //int x1 = x0 + 1;
   int y0 = (y > 0.0 ? (int)y : (int)y - 1);
   int y1 = y0 + 1;
   int z0 = (z > 0.0 ? (int)z : (int)z - 1);
@@ -264,8 +270,8 @@ static inline void gradient_coherent_noise_3d_vec_256(__m256* signal, __m256 x, 
   //int x0 = (x > 0.0 ? (int)x : (int)x - 1);
   //int x1 = x0 + 1;
   // Problem: _mm256_cvtps_epi32 rounds up
-  //__m256i x0 = _mm256_cvtps_epi32(_mm256_blendv_ps(_mm256_sub_ps(x, _mm256_set1_ps(1.0)), x, _mm256_cmp_ps(x, _mm256_setzero_ps(), _CMP_GT_OQ)));
-  __m256i x0 = _mm256_set1_epi32(1);
+  __m256i x0 = _mm256_cvtps_epi32(_mm256_blendv_ps(_mm256_sub_ps(x, _mm256_set1_ps(1.0)), x, _mm256_cmp_ps(x, _mm256_setzero_ps(), _CMP_GT_OQ)));
+  //__m256i x0 = _mm256_set1_epi32(1);
   __m256i x1 = _mm256_add_epi32(x0, _mm256_set1_epi32(1));
   //printf("Extracted value: %d\n", _mm256_extract_epi32(x0, 0));
   //printf("Extracted value: %d\n", _mm256_extract_epi32(x0, 1));

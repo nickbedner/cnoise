@@ -62,14 +62,21 @@ static inline void perlin_noise_init(struct PerlinNoise *perlin_noise) {
   }
 }
 
+static inline float *perlin_noise_eval_1d(struct PerlinNoise *perlin_noise, size_t x_size) {
+  return perlin_noise->perlin_func(perlin_noise, x_size, 1, 1);
+}
+
+static inline float *perlin_noise_eval_2d(struct PerlinNoise *perlin_noise, size_t x_size, size_t y_size) {
+  return perlin_noise->perlin_func(perlin_noise, x_size, y_size, 1);
+}
+
 static inline float *perlin_noise_eval_3d(struct PerlinNoise *perlin_noise, size_t x_size, size_t y_size, size_t z_size) {
   return perlin_noise->perlin_func(perlin_noise, x_size, y_size, z_size);
 }
 
 // Note: Every other value seems to be working and reversed
-// TODO: Add scale for noise sample
 static inline float *perlin_noise_eval_3d_avx2(struct PerlinNoise *perlin_noise, size_t x_size, size_t y_size, size_t z_size) {
-  float *values = _aligned_malloc(sizeof(float) * x_size * y_size * z_size, sizeof(float) * 8);
+  float *values = _aligned_malloc(sizeof(float) * x_size * y_size * z_size, sizeof(__m256));
 #pragma omp parallel for collapse(3) if (perlin_noise->parallel)
   for (int z_dim = 0; z_dim < z_size; z_dim++) {
     for (int y_dim = 0; y_dim < y_size; y_dim++) {
@@ -119,22 +126,19 @@ static inline float *perlin_noise_eval_3d_fallback(struct PerlinNoise *perlin_no
     for (int y_dim = 0; y_dim < y_size; y_dim++) {
       for (int x_dim = 0; x_dim < x_size; x_dim++) {
         float value = 0.0;
-        float signal = 0.0;
         float cur_persistence = 1.0;
-        float nx, ny, nz;
-        int cur_seed;
 
         float x = (perlin_noise->position[0] * perlin_noise->frequency) + (x_dim * perlin_noise->step);
         float y = (perlin_noise->position[1] * perlin_noise->frequency) + (y_dim * perlin_noise->step);
         float z = (perlin_noise->position[2] * perlin_noise->frequency) + (z_dim * perlin_noise->step);
 
         for (int cur_octave = 0; cur_octave < perlin_noise->octave_count; cur_octave++) {
-          nx = make_int_32_range(x);
-          ny = make_int_32_range(y);
-          nz = make_int_32_range(z);
+          float nx = make_int_32_range(x);
+          float ny = make_int_32_range(y);
+          float nz = make_int_32_range(z);
 
-          cur_seed = (perlin_noise->seed + cur_octave) & 0xffffffff;
-          signal = gradient_coherent_noise_3d(nx, ny, nz, cur_seed, perlin_noise->noise_quality);
+          int cur_seed = (perlin_noise->seed + cur_octave) & 0xffffffff;
+          float signal = gradient_coherent_noise_3d(nx, ny, nz, cur_seed, perlin_noise->noise_quality);
           value += signal * cur_persistence;
 
           x *= perlin_noise->lacunarity;

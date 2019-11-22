@@ -2,7 +2,9 @@
 #ifndef OPEN_SIMPLEX_H
 #define OPEN_SIMPLEX_H
 
-#include "common.h"
+// On hold until reimplemented
+
+/*#include "common.h"
 #include "stdbool.h"
 
 #define STRETCH_CONSTANT_2D -0.211324865405187;    //(1/Math.sqrt(2+1)-1)/2;
@@ -2109,6 +2111,6 @@
 		}
 
 		return value / NORM_CONSTANT_4D;
-	}
+	}*/
 
-#endif // OPEN_SIMPLEX_H
+#endif  // OPEN_SIMPLEX_H
