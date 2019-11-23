@@ -1,5 +1,7 @@
 language: c
-sudo: false
+sudo: true
+befire_install:
+  - sudo apt-get install libomp-dev
 compiler:
   - clang
   - gcc
