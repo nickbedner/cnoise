@@ -96,12 +96,12 @@ static inline float *perlin_noise_eval_3d_avx2(struct PerlinNoise *perlin_noise,
         for (int cur_octave = 0; cur_octave < perlin_noise->octave_count; cur_octave++) {
           // Note: Don't need this only need to check first and final
           // Check first and last if good continue else make in range
-          __m256 nx = make_int_32_range_vec_256(x_vec);
+          __m256 nx = make_int_32_range_avx2(x_vec);
           float ny = make_int_32_range(y);
           float nz = make_int_32_range(z);
 
           int cur_seed = (perlin_noise->seed + cur_octave) & 0xffffffff;
-          __m256 signal = gradient_coherent_noise_3d_vec_256(nx, ny, nz, cur_seed, perlin_noise->noise_quality);
+          __m256 signal = gradient_coherent_noise_3d_avx2(nx, ny, nz, cur_seed, perlin_noise->noise_quality);
           value = _mm256_add_ps(value, _mm256_mul_ps(signal, _mm256_set1_ps(cur_persistence)));
 
           x_vec = _mm256_mul_ps(x_vec, _mm256_set1_ps(perlin_noise->lacunarity));

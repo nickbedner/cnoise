@@ -3,7 +3,7 @@
 #include "../include/cnoise/cnoise.h"
 
 int main(int argc, char* argv[]) {
-  const int x_size = 16, y_size = 16, z_size = 16;
+  const int x_size = 16, y_size = 4, z_size = 4;
 
   struct PerlinNoise perlin_noise;
   perlin_noise_init(&perlin_noise);
