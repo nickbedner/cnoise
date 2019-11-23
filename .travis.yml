@@ -1,6 +1,6 @@
 language: c
 sudo: true
-befire_install:
+before_install:
   - sudo apt-get install libomp-dev
 compiler:
   - clang
