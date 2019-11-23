@@ -6,19 +6,20 @@
 static inline float run_benchmark(float* (*perlin_func)(struct PerlinNoise*, size_t, size_t, size_t), struct PerlinNoise* perlin_noise, size_t size_x, size_t size_y, size_t size_z, bool parallel);
 
 int main(int argc, char* argv[]) {
-  omp_set_num_threads(4);
-  // omp_set_num_threads(omp_get_num_procs());
+  printf("OpenMP threads available: %d\n", omp_get_num_procs());
+  //omp_set_num_threads(omp_get_num_procs());
+  omp_set_num_threads(8);
 
   const int size_x = 256, size_y = 256, size_z = 256;
 
   struct PerlinNoise perlin_noise;
   perlin_noise_init(&perlin_noise);
 
-  printf("Parallel AVX2 time: %f\n", run_benchmark(perlin_noise_eval_3d_avx2, &perlin_noise, size_x, size_y, size_z, true));
-  printf("Single thread AVX2 time: %f\n", run_benchmark(perlin_noise_eval_3d_avx2, &perlin_noise, size_x, size_y, size_z, false));
-
-  printf("Parallel fallback time: %f\n", run_benchmark(perlin_noise_eval_3d_fallback, &perlin_noise, size_x, size_y, size_z, true));
-  printf("Single thread fallback time: %f\n", run_benchmark(perlin_noise_eval_3d_fallback, &perlin_noise, size_x, size_y, size_z, false));
+  printf("AVX2 parallel time: %f\n", run_benchmark(perlin_noise_eval_3d_avx2, &perlin_noise, size_x, size_y, size_z, true));
+  printf("AVX2 single thread time: %f\n", run_benchmark(perlin_noise_eval_3d_avx2, &perlin_noise, size_x, size_y, size_z, false));
+  printf("///////////////////////////////////////////////////////////////////\n");
+  printf("Fallback parallel time: %f\n", run_benchmark(perlin_noise_eval_3d_fallback, &perlin_noise, size_x, size_y, size_z, true));
+  printf("Fallback single thread time: %f\n", run_benchmark(perlin_noise_eval_3d_fallback, &perlin_noise, size_x, size_y, size_z, false));
 
   return 0;
 }
@@ -30,8 +31,6 @@ static inline float run_benchmark(float* (*perlin_func)(struct PerlinNoise*, siz
   float* data = perlin_func(perlin_noise, size_x, size_y, size_z);
   float end_time = (float)clock() / CLOCKS_PER_SEC;
   noise_free(data);
-
-  printf("///////////////////////////////////////////////////////////////////\n");
 
   return end_time - start_time;
 }
