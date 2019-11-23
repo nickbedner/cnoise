@@ -11,13 +11,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _WIN32
-#include <intrin.h>
+#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+#define PLATFORM_WIN32
 #define cpuid(info, x) __cpuidex(info, x, 0)
 #else
-// GCC/Clang
-#include <cpuid.h>
+#define PLATFORM_OTHER
 #define cpuid(info, x) __cpuid_count(x, 0, info[0], info[1], info[2], info[3])
+#endif
+
+#if defined(__arm__) || defined(__aarch64__)
+#define ARCH_ARM
+#include <arm_neon.h>
+#else
+#define ARCH_32_64
+#include <intrin.h>
 #endif
 
 enum NoiseQuality {
@@ -37,13 +44,19 @@ enum SIMDType {
   SIMD_SSE4_1 = 2,
   SIMD_AVX = 3,
   SIMD_AVX2 = 4,
-  SIMD_AVX512F = 5
+  SIMD_AVX512F = 5,
+  SIMD_NEON = 6
 };
 
+static inline void *noise_allocate(size_t alignment, size_t size) {
+  void *mem = malloc(size + alignment + sizeof(void *));
+  void **data = (void **)(((uintptr_t)mem + alignment + sizeof(void *)) & ~(alignment - 1));
+  data[-1] = mem;
+  return data;
+}
+
 static inline void noise_free(float *data) {
-#ifdef _WIN32
-  _aligned_free(data);
-#endif
+  free(((void **)data)[-1]);
 }
 
 static inline int detect_simd_support() {
@@ -53,7 +66,7 @@ static inline int detect_simd_support() {
   bool avx2_supported = false;
   bool avx512f_supported = false;
 
-#ifdef _WIN32
+#ifdef ARCH_32_64
   int cpu_info[4];
   cpuid(cpu_info, 1);
 
@@ -67,7 +80,6 @@ static inline int detect_simd_support() {
 
   avx2_supported = cpu_info[1] & (1 << 5) || false;
   avx512f_supported = cpu_info[1] & (1 << 16) || false;
-#endif
 
   if (avx512f_supported)
     return SIMD_AVX512F;
@@ -81,6 +93,9 @@ static inline int detect_simd_support() {
     return SIMD_SSE2;
   else
     return SIMD_FALLBACK;
+#else
+// ARM stuff
+#endif
 }
 
 static inline float make_int_32_range(float n) {

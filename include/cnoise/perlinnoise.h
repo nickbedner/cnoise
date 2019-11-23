@@ -13,7 +13,7 @@
 #define DEFAULT_PERLIN_POSITION_Y 0.0
 #define DEFAULT_PERLIN_POSITION_Z 0.0
 #define DEFAULT_PERLIN_STEP 0.01
-#define DEFAULT_PERLIN_PARALLEL true
+#define DEFAULT_PERLIN_PARALLEL false
 #define DEFAULT_PERLIN_QUALITY QUALITY_STANDARD
 
 struct PerlinNoise {
@@ -46,6 +46,7 @@ static inline void perlin_noise_init(struct PerlinNoise *perlin_noise) {
   perlin_noise->parallel = DEFAULT_PERLIN_PARALLEL;
 
   switch (detect_simd_support()) {
+#ifdef ARCH_32_64
     case SIMD_AVX512F:
       break;
     case SIMD_AVX2:
@@ -60,6 +61,10 @@ static inline void perlin_noise_init(struct PerlinNoise *perlin_noise) {
     case SIMD_FALLBACK:
       perlin_noise->perlin_func = &perlin_noise_eval_3d_fallback;
       break;
+#else
+    case SIMD_NEON:
+      break;
+#endif
   }
 }
 
@@ -76,7 +81,7 @@ static inline float *perlin_noise_eval_3d(struct PerlinNoise *perlin_noise, size
 }
 
 static inline float *perlin_noise_eval_3d_avx2(struct PerlinNoise *perlin_noise, size_t x_size, size_t y_size, size_t z_size) {
-  float *values = _aligned_malloc(sizeof(float) * x_size * y_size * z_size, sizeof(__m256));
+  float *values = noise_allocate(sizeof(__m256), sizeof(float) * x_size * y_size * z_size);
 #pragma omp parallel for collapse(3) if (perlin_noise->parallel)
   for (int z_dim = 0; z_dim < z_size; z_dim++) {
     for (int y_dim = 0; y_dim < y_size; y_dim++) {
@@ -114,7 +119,7 @@ static inline float *perlin_noise_eval_3d_avx2(struct PerlinNoise *perlin_noise,
 }
 
 static inline float *perlin_noise_eval_3d_fallback(struct PerlinNoise *perlin_noise, size_t x_size, size_t y_size, size_t z_size) {
-  float *values = _aligned_malloc(sizeof(float) * x_size * y_size * z_size, sizeof(float) * 8);
+  float *values = noise_allocate(sizeof(float), sizeof(float) * x_size * y_size * z_size);
 #pragma omp parallel for collapse(3) if (perlin_noise->parallel)
   for (int z_dim = 0; z_dim < z_size; z_dim++) {
     for (int y_dim = 0; y_dim < y_size; y_dim++) {
