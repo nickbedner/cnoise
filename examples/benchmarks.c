@@ -7,10 +7,9 @@ static inline float run_benchmark(float* (*perlin_func)(struct PerlinNoise*, siz
 
 int main(int argc, char* argv[]) {
   printf("OpenMP threads available: %d\n", omp_get_num_procs());
-  //omp_set_num_threads(omp_get_num_procs());
-  omp_set_num_threads(8);
+  omp_set_num_threads(omp_get_num_procs());
 
-  const int size_x = 256, size_y = 256, size_z = 256;
+  const int size_x = 128, size_y = 128, size_z = 128;
 
   struct PerlinNoise perlin_noise;
   perlin_noise_init(&perlin_noise);
