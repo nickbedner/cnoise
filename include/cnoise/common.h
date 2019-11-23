@@ -60,26 +60,20 @@ static inline void noise_free(float *data) {
 }
 
 static inline int detect_simd_support() {
-  bool sse2_supported = false;
-  bool sse4_1_supported = false;
-  bool avx_supported = false;
-  bool avx2_supported = false;
-  bool avx512f_supported = false;
-
 #ifdef ARCH_32_64
   int cpu_info[4];
   cpuid(cpu_info, 1);
 
   //bool osUsesXSAVE_XRSTORE = cpuInfo[2] & (1 << 27) || false;
 
-  sse2_supported = cpu_info[3] & (1 << 26) || false;
-  sse4_1_supported = cpu_info[2] & (1 << 19) || false;
-  avx_supported = cpu_info[2] & (1 << 28) || false;
+  bool sse2_supported = cpu_info[3] & (1 << 26) || false;
+  bool sse4_1_supported = cpu_info[2] & (1 << 19) || false;
+  bool avx_supported = cpu_info[2] & (1 << 28) || false;
 
   cpuid(cpu_info, 7);
 
-  avx2_supported = cpu_info[1] & (1 << 5) || false;
-  avx512f_supported = cpu_info[1] & (1 << 16) || false;
+  bool avx2_supported = cpu_info[1] & (1 << 5) || false;
+  bool avx512f_supported = cpu_info[1] & (1 << 16) || false;
 
   if (avx512f_supported)
     return SIMD_AVX512F;
