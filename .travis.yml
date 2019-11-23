@@ -4,5 +4,5 @@ script:
   - cd examples
   - clang hellonoise.c -o hellonoise -lm -mavx2
   - ./hellonoise
-    - clang benchmarks.c -o benchmarks -lm -mavx2
+  - clang benchmarks.c -o benchmarks -lm -mavx2
   - ./benchmarks
