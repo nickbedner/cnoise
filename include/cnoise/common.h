@@ -2,7 +2,6 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <immintrin.h>
 #include <math.h>
 #include <omp.h>
 #include <stdbool.h>
@@ -13,9 +12,11 @@
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
 #define PLATFORM_WIN32
+#include <intrin.h>
 #define cpuid(info, x) __cpuidex(info, x, 0)
 #else
 #define PLATFORM_OTHER
+#include <cpuid.h>
 #define cpuid(info, x) __cpuid_count(x, 0, info[0], info[1], info[2], info[3])
 #endif
 
@@ -24,7 +25,8 @@
 #include <arm_neon.h>
 #else
 #define ARCH_32_64
-#include <intrin.h>
+#include <immintrin.h>
+#include <smmintrin.h>
 #endif
 
 enum NoiseQuality {
