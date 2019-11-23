@@ -30,7 +30,7 @@ static inline float run_benchmark(float* (*perlin_func)(struct PerlinNoise*, siz
   perlin_noise->parallel = parallel;
 
   start_time = (float)clock() / CLOCKS_PER_SEC;
-  data = perlin_noise_eval_3d_fallback(&perlin_noise, size_x, size_y, size_z);
+  data = perlin_noise_eval_3d_fallback(perlin_noise, size_x, size_y, size_z);
   end_time = (float)clock() / CLOCKS_PER_SEC;
   noise_free(data);
 
