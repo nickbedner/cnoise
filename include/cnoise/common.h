@@ -103,21 +103,20 @@ static inline float make_int_32_range(float n) {
     return n;
 }
 
+// TODO: Clean this up slow way of doing this
 static inline __m256 make_int_32_range_avx2(__m256 n) {
-  //__m256 comp_ge = _mm256_set1_ps(1073741824.0);
-  //__m256 comp_le = _mm256_set1_ps(-1073741824.0);
-  return n;
+  __m256 new_n;
 
-  //__m256 mask_ge = _mm256_cmp_ps(n, comp_ge, _CMP_GE_OQ);
-  //*val = _mm256_blendv_ps(y, x, mask_ge);
-  //
-  ////////////////////////////////////////////////////
-  //if (n >= 1073741824.0)
-  //  return (2.0 * fmod(n, 1073741824.0)) - 1073741824.0;
-  //else if (n <= -1073741824.0)
-  //  return (2.0 * fmod(n, 1073741824.0)) + 1073741824.0;
-  //else
-  //  return n;
+  for (int loop_num = 0; loop_num < 8; loop_num++) {
+    float extracted_num = *(((float *)&n) + loop_num);
+    if (extracted_num >= 1073741824.0)
+      *(((float *)&new_n) + loop_num) = (2.0 * fmod(extracted_num, 1073741824.0)) - 1073741824.0;
+    else if (extracted_num <= -1073741824.0)
+      *(((float *)&new_n) + loop_num) = (2.0 * fmod(extracted_num, 1073741824.0)) + 1073741824.0;
+    else
+      *(((float *)&new_n) + loop_num) = extracted_num;
+  }
+  return new_n;
 }
 
 static inline float cubic_interp(float n0, float n1, float n2, float n3, float a) {
