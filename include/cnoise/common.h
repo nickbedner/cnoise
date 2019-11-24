@@ -114,7 +114,12 @@ static inline int detect_simd_support() {
   else
     return SIMD_FALLBACK;
 #else
-// ARM stuff
+  bool neon_supported = false;
+
+  if (neon_supported)
+    return SIMD_NEON;
+  else
+    return SIMD_FALLBACK;
 #endif
 }
 

@@ -47,6 +47,9 @@ jobs:
   - stage: build
     os: osx
     compiler: clang
+    before_install:
+      - brew update
+      - brew install libomp
     sudo: true
     script:
       - cd examples
