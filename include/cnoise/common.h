@@ -82,7 +82,7 @@ static inline void *noise_allocate(size_t alignment, size_t size) {
 }
 
 static inline void noise_free(float *data) {
-  free(((void **)data)[-1]);
+  //free(((void **)data)[-1]);
 }
 
 static inline int detect_simd_support() {

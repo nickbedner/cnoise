@@ -49,8 +49,7 @@ jobs:
     compiler: clang
     before_install:
       - brew update
-      - brew install llvm
-      - brew install libomp
+      - brew install llvm libomp
     sudo: true
     script:
       - cd examples
