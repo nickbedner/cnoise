@@ -1,7 +1,7 @@
 language: c
-compiler:
-  - clang
-  - gcc
+
+notifications:
+  email: false
 
 jobs:
   include:
