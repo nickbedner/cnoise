@@ -76,13 +76,13 @@ static inline float gradient_coherent_noise_3d(float x, float y, float z, int se
 
 static inline void *noise_allocate(size_t alignment, size_t size) {
   void *mem = malloc(size + alignment + sizeof(void *));
-  void **data = (void **)(((uintptr_t)mem + alignment + sizeof(void *)) & ~(alignment - 1));
-  data[-1] = mem;
-  return data;
+  void **noise_set = (void **)(((uintptr_t)mem + alignment + sizeof(void *)) & ~(alignment - 1));
+  noise_set[-1] = mem;
+  return noise_set;
 }
 
-static inline void noise_free(float *data) {
-  //free(((void **)data)[-1]);
+static inline void noise_free(float *noise_set) {
+  free(((void **)noise_set)[-1]);
 }
 
 static inline int detect_simd_support() {
