@@ -58,13 +58,13 @@ static inline void perlin_noise_init(struct PerlinNoise *perlin_noise) {
       break;
     case SIMD_SSE2:
       break;
-    case SIMD_FALLBACK:
-      perlin_noise->perlin_func = &perlin_noise_eval_3d_fallback;
-      break;
 #else
     case SIMD_NEON:
       break;
 #endif
+    default:
+      perlin_noise->perlin_func = &perlin_noise_eval_3d_fallback;
+      break;
   }
 }
 
