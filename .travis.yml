@@ -5,6 +5,7 @@ compiler:
 
 jobs:
   include:
+  - stage: build
     os: linux
     compiler: clang
     sudo: true
@@ -16,6 +17,7 @@ jobs:
       - clang benchmarks.c -o benchmarks -lm -mavx2 -fopenmp=libiomp5
       - ./benchmarks
 
+  - stage: build
     os: linux
     compiler: gcc
     sudo: true
