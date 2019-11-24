@@ -53,7 +53,7 @@ jobs:
     sudo: true
     script:
       - cd examples
-      - clang hellonoise.c -o hellonoise -lm -mavx2 -fopenmp
+      - clang hellonoise.c -o hellonoise -lm -mavx2 -fopenmp -lomp
       - ./hellonoise
-      - clang benchmarks.c -o benchmarks -lm -mavx2 -fopenmp
+      - clang benchmarks.c -o benchmarks -lm -mavx2 -fopenmp -lomp
       - ./benchmarks
