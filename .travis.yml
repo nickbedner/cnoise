@@ -50,7 +50,7 @@ jobs:
     sudo: true
     script:
       - cd examples
-      - clang hellonoise.c -o hellonoise -lm -mavx2 -fopenmp=libiomp5
+      - clang hellonoise.c -o hellonoise -lm -mavx2 -fopenmp
       - ./hellonoise
-      - clang benchmarks.c -o benchmarks -lm -mavx2 -fopenmp=libiomp5
+      - clang benchmarks.c -o benchmarks -lm -mavx2 -fopenmp
       - ./benchmarks

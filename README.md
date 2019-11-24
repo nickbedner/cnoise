@@ -4,11 +4,16 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/cec66d7aa0304d15ade4ac7b8a0aff95)](https://www.codacy.com/manual/Zalrioth/cnoise?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Zalrioth/cnoise&amp;utm_campaign=Badge_Grade)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Header only C noise library with SIMD, multithreading, and more. Will automatically select the best instruction set to use at runtime. Based on libnoise and FastNoise
+Header only C noise library with SIMD, multithreading, and more. Will automatically select the best instruction set to use at runtime. Based on libnoise and FastNoise<br/>
 
 ## Settings up a Project
 
-Include the cnoise header and you're good to go. OpenMP required for multithreading support but can work without it.
+Include the cnoise header and you're good to go. OpenMP required for multithreading support but can work without it.<br/>
+
+## Platforms tested
+
+- Clang: Windows, Linux, ARM Linux, MacOSX<br/>
+- GCC: Linux<br/>
 
 ### Implemented
 
