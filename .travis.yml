@@ -2,12 +2,13 @@ language: c
 os:
   - linux
   - osx
-sudo: true
-before_install:
-  - sudo apt-get install libomp-dev
-compiler:
+  compiler:
   - clang
   - gcc
+sudo: true
+before_install:
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install libomp-dev; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install libomp; fi
 script:
   - cd examples
   - clang hellonoise.c -o hellonoise -lm -mavx2 -fopenmp=libiomp5
