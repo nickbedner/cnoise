@@ -19,7 +19,7 @@
 #include <smmintrin.h>
 #endif
 
-#ifndef ARCH_ARM
+#ifdef ARCH_32_64
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
 #define PLATFORM_WIN32
 #include <intrin.h>

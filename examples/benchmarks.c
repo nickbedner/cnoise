@@ -14,12 +14,15 @@ int main(int argc, char* argv[]) {
   struct PerlinNoise perlin_noise;
   perlin_noise_init(&perlin_noise);
 
+#ifdef ARCH_32_64
   printf("AVX2 parallel time: %f\n", run_benchmark(perlin_noise_eval_3d_avx2, &perlin_noise, size_x, size_y, size_z, true));
   printf("AVX2 single thread time: %f\n", run_benchmark(perlin_noise_eval_3d_avx2, &perlin_noise, size_x, size_y, size_z, false));
   printf("///////////////////////////////////////////////////////////////////\n");
+#else
+// ARM Neon
+#endif
   printf("Fallback parallel time: %f\n", run_benchmark(perlin_noise_eval_3d_fallback, &perlin_noise, size_x, size_y, size_z, true));
   printf("Fallback single thread time: %f\n", run_benchmark(perlin_noise_eval_3d_fallback, &perlin_noise, size_x, size_y, size_z, false));
-
   return 0;
 }
 
