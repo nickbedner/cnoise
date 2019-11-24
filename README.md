@@ -12,6 +12,7 @@ Include the cnoise header and you're good to go. OpenMP required for multithread
 
 ### Implemented
 
+AVX2<br/>
 Billow Noise<br/>
 Perlin Noise<br/>
 Ridged Fractal Noise<br/>
@@ -21,17 +22,16 @@ White Noise<br/>
 
 ### In Progress
 
-AVX2<br/>
+AVX<br/>
+AVX-512F<br/>
 Benchmarks<br/>
 Doc<br/>
+SSE2<br/>
+SSE4.1<br/>
 
 ### Planned
 
 ARM Neon<br/>
-AVX<br/>
-AVX-512F<br/>
 Hydraulic Noise<br/>
 GLSL implementations<br/>
 Open Simplex Noise<br/>
-SSE2<br/>
-SSE4.1<br/>
