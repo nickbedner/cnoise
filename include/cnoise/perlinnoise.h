@@ -64,6 +64,7 @@ static inline void perlin_noise_init(struct PerlinNoise *perlin_noise) {
       break;
 #else
     case SIMD_NEON:
+      perlin_noise->perlin_func = &perlin_noise_eval_3d_fallback;
       break;
 #endif
     default:
