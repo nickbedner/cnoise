@@ -1,15 +1,25 @@
 language: c
-os:
-  - linux
-compiler:
-  - clang
-  - gcc
-sudo: true
-before_install:
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install libomp-dev; fi
-script:
-  - cd examples
-  - $TRAVIS_COMPILER hellonoise.c -o hellonoise -lm -mavx2 -fopenmp=libiomp5
-  - ./hellonoise
-  - $TRAVIS_COMPILER benchmarks.c -o benchmarks -lm -mavx2 -fopenmp=libiomp5
-  - ./benchmarks
+
+jobs:
+  include:
+    os: linux
+    compiler: clang
+    sudo: true
+    before_install: sudo apt-get install libomp-dev
+    script:
+      - cd examples
+      - clang hellonoise.c -o hellonoise -lm -mavx2 -fopenmp=libiomp5
+      - ./hellonoise
+      - clang benchmarks.c -o benchmarks -lm -mavx2 -fopenmp=libiomp5
+      - ./benchmarks
+
+    os: linux
+    compiler: gcc
+    sudo: true
+    before_install: sudo apt-get install libomp-dev
+    script:
+      - cd examples
+      - gcc hellonoise.c -o hellonoise -lm -mavx2 -fopenmp
+      - ./hellonoise
+      - gcc benchmarks.c -o benchmarks -lm -mavx2 -fopenmp
+      - ./benchmarks
