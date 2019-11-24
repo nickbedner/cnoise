@@ -48,10 +48,9 @@ jobs:
     os: osx
     compiler: clang
     sudo: true
-    before_install: brew install libomp
     script:
       - cd examples
-      - clang hellonoise.c -o hellonoise -lm -mavx2 -fopenmp
+      - clang hellonoise.c -o hellonoise -lm -mavx2 -fopenmp=libiomp5
       - ./hellonoise
-      - clang benchmarks.c -o benchmarks -lm -mavx2 -fopenmp
+      - clang benchmarks.c -o benchmarks -lm -mavx2 -fopenmp=libiomp5
       - ./benchmarks

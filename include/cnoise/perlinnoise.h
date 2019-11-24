@@ -80,6 +80,7 @@ static inline float *perlin_noise_eval_3d(struct PerlinNoise *perlin_noise, size
   return perlin_noise->perlin_func(perlin_noise, x_size, y_size, z_size);
 }
 
+#ifdef ARCH_32_64
 static inline float *perlin_noise_eval_3d_avx2(struct PerlinNoise *perlin_noise, size_t x_size, size_t y_size, size_t z_size) {
   float *values = noise_allocate(sizeof(__m256), sizeof(float) * x_size * y_size * z_size);
 #pragma omp parallel for collapse(3) if (perlin_noise->parallel)
@@ -117,6 +118,7 @@ static inline float *perlin_noise_eval_3d_avx2(struct PerlinNoise *perlin_noise,
   }
   return values;
 }
+#endif
 
 static inline float *perlin_noise_eval_3d_fallback(struct PerlinNoise *perlin_noise, size_t x_size, size_t y_size, size_t z_size) {
   float *values = noise_allocate(sizeof(float), sizeof(float) * x_size * y_size * z_size);

@@ -10,6 +10,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(__arm__) || defined(__aarch64__)
+#define ARCH_ARM
+#include <arm_neon.h>
+#else
+#define ARCH_32_64
+#include <immintrin.h>
+#include <smmintrin.h>
+#endif
+
+#ifndef ARCH_ARM
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
 #define PLATFORM_WIN32
 #include <intrin.h>
@@ -19,14 +29,6 @@
 #include <cpuid.h>
 #define cpuid(info, x) __cpuid_count(x, 0, info[0], info[1], info[2], info[3])
 #endif
-
-#if defined(__arm__) || defined(__aarch64__)
-#define ARCH_ARM
-#include <arm_neon.h>
-#else
-#define ARCH_32_64
-#include <immintrin.h>
-#include <smmintrin.h>
 #endif
 
 enum NoiseQuality {
@@ -49,6 +51,28 @@ enum SIMDType {
   SIMD_AVX512F = 5,
   SIMD_NEON = 6
 };
+
+static inline void *noise_allocate(size_t alignment, size_t size);
+static inline void noise_free(float *data);
+static inline int detect_simd_support();
+#ifdef ARCH_32_64
+static inline __m256 make_int_32_range_avx2(__m256 n);
+static inline __m256 s_curve3_avx2(__m256 a);
+static inline __m256 s_curve5_avx2(__m256 a);
+static inline __m256 linear_interp_avx2(__m256 n0, __m256 n1, __m256 a);
+static inline __m256 gradient_noise_3d_avx2(__m256 fx, float fy, float fz, __m256i ix, int iy, int iz, int seed);
+static inline __m256 gradient_coherent_noise_3d_avx2(__m256 x, float y, float z, int seed, enum NoiseQuality noise_quality);
+#endif
+static inline float make_int_32_range(float n);
+static inline float cubic_interp(float n0, float n1, float n2, float n3, float a);
+static inline float s_curve3(float a);
+static inline float s_curve5(float a);
+static inline float linear_interp(float n0, float n1, float a);
+static inline int fast_floor(float x);
+static inline int int_value_noise_3d(int x, int y, int z, int seed);
+static inline float value_noise_3d(int x, int y, int z, int seed);
+static inline float gradient_noise_3d(float fx, float fy, float fz, int ix, int iy, int iz, int seed);
+static inline float gradient_coherent_noise_3d(float x, float y, float z, int seed, enum NoiseQuality noise_quality);
 
 static inline void *noise_allocate(size_t alignment, size_t size) {
   void *mem = malloc(size + alignment + sizeof(void *));
@@ -94,15 +118,7 @@ static inline int detect_simd_support() {
 #endif
 }
 
-static inline float make_int_32_range(float n) {
-  if (n >= 1073741824.0)
-    return (2.0 * fmod(n, 1073741824.0)) - 1073741824.0;
-  else if (n <= -1073741824.0)
-    return (2.0 * fmod(n, 1073741824.0)) + 1073741824.0;
-  else
-    return n;
-}
-
+#ifdef ARCH_32_64
 // TODO: Clean this up slow way of doing this
 static inline __m256 make_int_32_range_avx2(__m256 n) {
   __m256 new_n;
@@ -119,20 +135,8 @@ static inline __m256 make_int_32_range_avx2(__m256 n) {
   return new_n;
 }
 
-static inline float cubic_interp(float n0, float n1, float n2, float n3, float a) {
-  float p = (n3 - n2) - (n0 - n1);
-  float q = (n0 - n1) - p;
-  float r = n2 - n0;
-  float s = n1;
-  return p * a * a * a + q * a * a + r * a + s;
-}
-
 static inline __m256 s_curve3_avx2(__m256 a) {
   return _mm256_mul_ps(a, _mm256_mul_ps(a, _mm256_sub_ps(_mm256_set1_ps(3.0), _mm256_mul_ps(_mm256_set1_ps(2.0), a))));
-}
-
-static inline float s_curve3(float a) {
-  return (a * a * (3.0 - 2.0 * a));
 }
 
 static inline __m256 s_curve5_avx2(__m256 a) {
@@ -143,37 +147,8 @@ static inline __m256 s_curve5_avx2(__m256 a) {
   return _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_mm256_set1_ps(6.0), a5), _mm256_mul_ps(_mm256_set1_ps(15.0), a4)), _mm256_mul_ps(_mm256_set1_ps(10.0), a3));
 }
 
-static inline float s_curve5(float a) {
-  float a3 = a * a * a;
-  float a4 = a3 * a;
-  float a5 = a4 * a;
-  return (6.0 * a5) - (15.0 * a4) + (10.0 * a3);
-}
-
 static inline __m256 linear_interp_avx2(__m256 n0, __m256 n1, __m256 a) {
   return _mm256_add_ps(_mm256_mul_ps(_mm256_sub_ps(_mm256_set1_ps(1.0), a), n0), _mm256_mul_ps(a, n1));
-}
-
-static inline float linear_interp(float n0, float n1, float a) {
-  return ((1.0 - a) * n0) + (a * n1);
-}
-
-static inline int fast_floor(float x) {
-  int xi = (int)x;
-  return x < xi ? xi - 1 : xi;
-}
-
-static inline int int_value_noise_3d(int x, int y, int z, int seed) {
-  // All constants are primes and must remain prime in order for this noise function to work correctly.
-  //int n = (X_NOISE_GEN * x + Y_NOISE_GEN * y + Z_NOISE_GEN * z + SEED_NOISE_GEN * seed) & 0x7fffffff;
-  int n = 1;
-  n = (n >> 13) ^ n;
-
-  return (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff;
-}
-
-static inline float value_noise_3d(int x, int y, int z, int seed) {
-  return 1.0 - ((float)int_value_noise_3d(x, y, z, seed) / 1073741824.0);
 }
 
 static inline __m256 gradient_noise_3d_avx2(__m256 fx, float fy, float fz, __m256i ix, int iy, int iz, int seed) {
@@ -197,26 +172,6 @@ static inline __m256 gradient_noise_3d_avx2(__m256 fx, float fy, float fz, __m25
   float zv_point = (fz - (float)iz);
 
   return _mm256_mul_ps(_mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(xv_gradient, xv_point), _mm256_mul_ps(_mm256_set1_ps(yv_gradient), _mm256_set1_ps(yv_point))), _mm256_mul_ps(_mm256_set1_ps(zv_gradient), _mm256_set1_ps(zv_point))), _mm256_set1_ps(2.12));
-}
-
-static inline float gradient_noise_3d(float fx, float fy, float fz, int ix, int iy, int iz, int seed) {
-  int random_x = (*(int *)&fx) ^ (*(int *)&fx >> 16);
-  int random_y = (*(int *)&fy) ^ (*(int *)&fy >> 16);
-  int random_z = (*(int *)&fz) ^ (*(int *)&fz >> 16);
-
-  random_x = seed ^ (X_NOISE_GEN * random_x);
-  random_y = seed ^ (Y_NOISE_GEN * random_y);
-  random_z = seed ^ (Z_NOISE_GEN * random_z);
-
-  float xv_gradient = (random_x * random_x * random_x * 60493) / 2147483648.0;
-  float yv_gradient = (random_y * random_y * random_y * 60493) / 2147483648.0;
-  float zv_gradient = (random_z * random_z * random_z * 60493) / 2147483648.0;
-
-  float xv_point = (fx - (float)ix);
-  float yv_point = (fy - (float)iy);
-  float zv_point = (fz - (float)iz);
-
-  return ((xv_gradient * xv_point) + (yv_gradient * yv_point) + (zv_gradient * zv_point)) * 2.12;
 }
 
 static inline __m256 gradient_coherent_noise_3d_avx2(__m256 x, float y, float z, int seed, enum NoiseQuality noise_quality) {
@@ -263,6 +218,77 @@ static inline __m256 gradient_coherent_noise_3d_avx2(__m256 x, float y, float z,
   __m256 iy1 = linear_interp_avx2(ix0, ix1, _mm256_set1_ps(ys));
 
   return linear_interp_avx2(iy0, iy1, _mm256_set1_ps(zs));
+}
+#endif
+
+static inline float make_int_32_range(float n) {
+  if (n >= 1073741824.0)
+    return (2.0 * fmod(n, 1073741824.0)) - 1073741824.0;
+  else if (n <= -1073741824.0)
+    return (2.0 * fmod(n, 1073741824.0)) + 1073741824.0;
+  else
+    return n;
+}
+
+static inline float cubic_interp(float n0, float n1, float n2, float n3, float a) {
+  float p = (n3 - n2) - (n0 - n1);
+  float q = (n0 - n1) - p;
+  float r = n2 - n0;
+  float s = n1;
+  return p * a * a * a + q * a * a + r * a + s;
+}
+
+static inline float s_curve3(float a) {
+  return (a * a * (3.0 - 2.0 * a));
+}
+
+static inline float s_curve5(float a) {
+  float a3 = a * a * a;
+  float a4 = a3 * a;
+  float a5 = a4 * a;
+  return (6.0 * a5) - (15.0 * a4) + (10.0 * a3);
+}
+
+static inline float linear_interp(float n0, float n1, float a) {
+  return ((1.0 - a) * n0) + (a * n1);
+}
+
+static inline int fast_floor(float x) {
+  int xi = (int)x;
+  return x < xi ? xi - 1 : xi;
+}
+
+static inline int int_value_noise_3d(int x, int y, int z, int seed) {
+  // All constants are primes and must remain prime in order for this noise function to work correctly.
+  //int n = (X_NOISE_GEN * x + Y_NOISE_GEN * y + Z_NOISE_GEN * z + SEED_NOISE_GEN * seed) & 0x7fffffff;
+  int n = 1;
+  n = (n >> 13) ^ n;
+
+  return (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff;
+}
+
+static inline float value_noise_3d(int x, int y, int z, int seed) {
+  return 1.0 - ((float)int_value_noise_3d(x, y, z, seed) / 1073741824.0);
+}
+
+static inline float gradient_noise_3d(float fx, float fy, float fz, int ix, int iy, int iz, int seed) {
+  int random_x = (*(int *)&fx) ^ (*(int *)&fx >> 16);
+  int random_y = (*(int *)&fy) ^ (*(int *)&fy >> 16);
+  int random_z = (*(int *)&fz) ^ (*(int *)&fz >> 16);
+
+  random_x = seed ^ (X_NOISE_GEN * random_x);
+  random_y = seed ^ (Y_NOISE_GEN * random_y);
+  random_z = seed ^ (Z_NOISE_GEN * random_z);
+
+  float xv_gradient = (random_x * random_x * random_x * 60493) / 2147483648.0;
+  float yv_gradient = (random_y * random_y * random_y * 60493) / 2147483648.0;
+  float zv_gradient = (random_z * random_z * random_z * 60493) / 2147483648.0;
+
+  float xv_point = (fx - (float)ix);
+  float yv_point = (fy - (float)iy);
+  float zv_point = (fz - (float)iz);
+
+  return ((xv_gradient * xv_point) + (yv_gradient * yv_point) + (zv_gradient * zv_point)) * 2.12;
 }
 
 static inline float gradient_coherent_noise_3d(float x, float y, float z, int seed, enum NoiseQuality noise_quality) {
