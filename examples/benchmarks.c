@@ -12,8 +12,11 @@ int main(int argc, char* argv[]) {
   perlin_noise_init(&perlin_noise);
 
 #ifdef ARCH_32_64
-  printf("AVX2 parallel time: %f\n", run_benchmark(&perlin_noise_eval_3d_avx2, &perlin_noise, size_x, size_y, size_z, true));
-  printf("AVX2 single thread time: %f\n", run_benchmark(&perlin_noise_eval_3d_avx2, &perlin_noise, size_x, size_y, size_z, false));
+  if (check_simd_support(SIMD_AVX2)) {
+    printf("AVX2 parallel time: %f\n", run_benchmark(&perlin_noise_eval_3d_avx2, &perlin_noise, size_x, size_y, size_z, true));
+    printf("AVX2 single thread time: %f\n", run_benchmark(&perlin_noise_eval_3d_avx2, &perlin_noise, size_x, size_y, size_z, false));
+  } else
+    printf("AVX2 support not detected!\n");
   printf("///////////////////////////////////////////////////////////////////\n");
 #else
 // ARM Neon

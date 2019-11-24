@@ -123,6 +123,46 @@ static inline int detect_simd_support() {
 #endif
 }
 
+static inline bool check_simd_support(int instruction_type) {
+#ifdef ARCH_32_64
+  int cpu_info[4];
+  cpuid(cpu_info, 1);
+
+  //bool osUsesXSAVE_XRSTORE = cpuInfo[2] & (1 << 27) || false;
+
+  bool sse2_supported = cpu_info[3] & (1 << 26) || false;
+  bool sse4_1_supported = cpu_info[2] & (1 << 19) || false;
+  bool avx_supported = cpu_info[2] & (1 << 28) || false;
+
+  cpuid(cpu_info, 7);
+
+  bool avx2_supported = cpu_info[1] & (1 << 5) || false;
+  bool avx512f_supported = cpu_info[1] & (1 << 16) || false;
+
+  if (avx512f_supported && instruction_type == SIMD_AVX512F)
+    return true;
+  else if (avx2_supported && instruction_type == SIMD_AVX2)
+    return true;
+  else if (avx_supported && instruction_type == SIMD_AVX)
+    return true;
+  else if (sse4_1_supported && instruction_type == SIMD_SSE4_1)
+    return true;
+  else if (sse2_supported && instruction_type == SIMD_SSE2)
+    return true;
+  else if (instruction_type == SIMD_FALLBACK)
+    return true;
+  else
+    return false;
+#else
+  bool neon_supported = false;
+
+  if (neon_supported && instruction_type == SIMD_NEON)
+    return true;
+  else
+    return false;
+#endif
+}
+
 #ifdef ARCH_32_64
 // TODO: Clean this up slow way of doing this
 static inline __m256 make_int_32_range_avx2(__m256 n) {
