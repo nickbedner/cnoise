@@ -30,9 +30,9 @@ static inline float run_benchmark(float* (*perlin_func)(struct PerlinNoise*, siz
   perlin_noise->parallel = parallel;
 
   float start_time = (float)clock() / CLOCKS_PER_SEC;
-  float* data = perlin_func(perlin_noise, size_x, size_y, size_z);
+  float* noise_set = perlin_func(perlin_noise, size_x, size_y, size_z);
   float end_time = (float)clock() / CLOCKS_PER_SEC;
-  noise_free(data);
+  noise_free(noise_set);
 
   return end_time - start_time;
 }

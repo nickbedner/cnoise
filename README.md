@@ -11,10 +11,18 @@ Header only C noise library with SIMD, multithreading, and more. Will automatica
 Include the cnoise header and you're good to go. OpenMP required for multithreading support but can work without it.
 
 ```c
-struct PerlinNoise perlin_noise;
-perlin_noise_init(&perlin_noise);
+#include <cnoise/cnoise.h>
 
-float* data = perlin_noise_eval_3d(&perlin_noise, 64, 64, 64);
+int main(int argc, char* argv[]) {
+  struct PerlinNoise perlin_noise;
+  perlin_noise_init(&perlin_noise);
+
+  float* noise_set = perlin_noise_eval_3d(&perlin_noise, 64, 64, 64);
+  noise_free(noise_set);
+
+  return 0;
+}
+
 ```
 
 ## Platforms tested
