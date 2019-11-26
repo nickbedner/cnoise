@@ -44,7 +44,7 @@ jobs:
       - clang benchmarks.c -o benchmarks -lm -mavx -mavx2 -fopenmp=libiomp5 -O3
       - ./benchmarks
 
-- stage: build
+  - stage: build
     os: linux
     arch: arm64
     compiler: gcc
