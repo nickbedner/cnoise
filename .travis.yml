@@ -13,9 +13,9 @@ jobs:
     before_install: sudo apt-get install libomp-dev
     script:
       - cd examples
-      - clang hellonoise.c -o hellonoise -mavx -mavx2 -fopenmp=libiomp5
+      - clang hellonoise.c -o hellonoise -lm -mavx -mavx2 -fopenmp=libiomp5
       - ./hellonoise
-      - clang benchmarks.c -o benchmarks -mavx -mavx2 -fopenmp=libiomp5 -O3
+      - clang benchmarks.c -o benchmarks -lm -mavx -mavx2 -fopenmp=libiomp5 -O3
       - ./benchmarks
 
   - stage: build
@@ -26,9 +26,9 @@ jobs:
     before_install: sudo apt-get install libomp-dev
     script:
       - cd examples
-      - gcc hellonoise.c -o hellonoise -mavx -mavx2 -fopenmp
+      - gcc hellonoise.c -o hellonoise -lm -mavx -mavx2 -fopenmp
       - ./hellonoise
-      - gcc benchmarks.c -o benchmarks -mavx -mavx2 -fopenmp -O3
+      - gcc benchmarks.c -o benchmarks -lm -mavx -mavx2 -fopenmp -O3
       - ./benchmarks
 
   - stage: build
@@ -39,9 +39,9 @@ jobs:
     before_install: sudo apt-get install libomp-dev
     script:
       - cd examples
-      - clang hellonoise.c -o hellonoise -fopenmp=libiomp5
+      - clang hellonoise.c -o hellonoise -lm -fopenmp=libiomp5
       - ./hellonoise
-      - clang benchmarks.c -o benchmarks -fopenmp=libiomp5 -O3
+      - clang benchmarks.c -o benchmarks -lm -fopenmp=libiomp5 -O3
       - ./benchmarks
 
   - stage: build
@@ -52,9 +52,9 @@ jobs:
     before_install: sudo apt-get install libomp-dev
     script:
       - cd examples
-      - gcc hellonoise.c -o hellonoise -fopenmp
+      - gcc hellonoise.c -o hellonoise -lm -fopenmp
       - ./hellonoise
-      - gcc benchmarks.c -o benchmarks -fopenmp -O3
+      - gcc benchmarks.c -o benchmarks -lm -fopenmp -O3
       - ./benchmarks
 
   - stage: build
