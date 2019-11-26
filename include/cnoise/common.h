@@ -31,11 +31,15 @@
 #endif
 #endif
 
-#if defined(__GNUC__) || defined(__APPLE__)
-#if __GNUC__ < 8 || defined(__APPLE__)
+#ifdef __GNUC__
+#if __GNUC__ < 8
 #define _mm256_set_m128i(xmm1, xmm2) _mm256_permute2f128_si256(_mm256_castsi128_si256(xmm1), _mm256_castsi128_si256(xmm2), 2)
 #define _mm256_set_m128f(xmm1, xmm2) _mm256_permute2f128_ps(_mm256_castps128_ps256(xmm1), _mm256_castps128_ps256(xmm2), 2)
 #endif
+#endif
+
+#ifdef __APPLE__
+#define _mm256_set_m128i(hi, lo) _mm256_insertf128_si256(_mm256_castsi128_si256(lo), hi, 1)
 #endif
 
 enum NoiseQuality {
@@ -63,12 +67,16 @@ static inline void *noise_allocate(size_t alignment, size_t size);
 static inline void noise_free(float *data);
 static inline int detect_simd_support();
 #ifdef ARCH_32_64
+// SSE4_1
+
+// AVX
 static inline __m256 make_int_32_range_avx(__m256 n);
 static inline __m256 s_curve3_avx(__m256 a);
 static inline __m256 s_curve5_avx(__m256 a);
 static inline __m256 linear_interp_avx(__m256 n0, __m256 n1, __m256 a);
 static inline __m256 gradient_noise_3d_avx(__m256 fx, float fy, float fz, __m256i ix, int iy, int iz, int seed);
 static inline __m256 gradient_coherent_noise_3d_avx(__m256 x, float y, float z, int seed, enum NoiseQuality noise_quality);
+// AVX2
 static inline __m256 gradient_noise_3d_avx2(__m256 fx, float fy, float fz, __m256i ix, int iy, int iz, int seed);
 static inline __m256 gradient_coherent_noise_3d_avx2(__m256 x, float y, float z, int seed, enum NoiseQuality noise_quality);
 #endif
