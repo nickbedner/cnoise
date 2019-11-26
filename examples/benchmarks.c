@@ -11,6 +11,10 @@ int main(int argc, char* argv[]) {
   struct PerlinNoise perlin_noise;
   perlin_noise_init(&perlin_noise);
 
+  // Warm-up tests to prevent delay on first allocation
+  printf("Warm-up time 1: %f\n", run_benchmark(&perlin_noise_eval_3d_fallback, &perlin_noise, size_x, size_y, size_z, false));
+  printf("Warm-up time 2: %f\n", run_benchmark(&perlin_noise_eval_3d_fallback, &perlin_noise, size_x, size_y, size_z, true));
+
 #ifdef ARCH_32_64
   if (check_simd_support(SIMD_AVX2)) {
     printf("AVX2 parallel time: %f\n", run_benchmark(&perlin_noise_eval_3d_avx2, &perlin_noise, size_x, size_y, size_z, true));

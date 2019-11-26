@@ -32,23 +32,23 @@ int main(int argc, char* argv[]) {
 
 ### Implemented
 
+* AVX
 * AVX2
+* Benchmarks
 * Billow Noise
 * Perlin Noise
 * Ridged Fractal Noise
 * Runtime instruction select
 * Voronoi Noise
-* White Noise
 
 ### In Progress
 
 * ARM Neon
-* AVX
 * AVX-512F
-* Benchmarks
 * Doc
 * SSE2
 * SSE4.1
+* White Noise
 
 ### Planned
 
