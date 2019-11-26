@@ -31,6 +31,13 @@
 #endif
 #endif
 
+#ifdef __GNUC__
+#if __GNUC__ < 8
+#define _mm256_set_m128i(xmm1, xmm2) _mm256_permute2f128_si256(_mm256_castsi128_si256(xmm1), _mm256_castsi128_si256(xmm2), 2)
+#define _mm256_set_m128f(xmm1, xmm2) _mm256_permute2f128_ps(_mm256_castps128_ps256(xmm1), _mm256_castps128_ps256(xmm2), 2)
+#endif
+#endi
+
 enum NoiseQuality {
   QUALITY_FAST,
   QUALITY_STANDARD,
