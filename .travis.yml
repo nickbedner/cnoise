@@ -15,7 +15,7 @@ jobs:
       - cd examples
       - clang hellonoise.c -o hellonoise -lm -mavx -mavx2 -fopenmp=libiomp5
       - ./hellonoise
-      - clang benchmarks.c -o benchmarks -lm -mavx -mavx2 -fopenmp=libiomp5
+      - clang benchmarks.c -o benchmarks -lm -mavx -mavx2 -fopenmp=libiomp5 -O3
       - ./benchmarks
 
   - stage: build
@@ -28,7 +28,7 @@ jobs:
       - cd examples
       - gcc hellonoise.c -o hellonoise -lm -mavx -mavx2 -fopenmp
       - ./hellonoise
-      - gcc benchmarks.c -o benchmarks -lm -mavx -mavx2 -fopenmp
+      - gcc benchmarks.c -o benchmarks -lm -mavx -mavx2 -fopenmp -O3
       - ./benchmarks
 
   - stage: build
@@ -41,7 +41,20 @@ jobs:
       - cd examples
       - clang hellonoise.c -o hellonoise -lm -mavx -mavx2 -fopenmp=libiomp5
       - ./hellonoise
-      - clang benchmarks.c -o benchmarks -lm -mavx -mavx2 -fopenmp=libiomp5
+      - clang benchmarks.c -o benchmarks -lm -mavx -mavx2 -fopenmp=libiomp5 -O3
+      - ./benchmarks
+
+- stage: build
+    os: linux
+    arch: arm64
+    compiler: gcc
+    sudo: true
+    before_install: sudo apt-get install libomp-dev
+    script:
+      - cd examples
+      - gcc hellonoise.c -o hellonoise -lm -mavx -mavx2 -fopenmp
+      - ./hellonoise
+      - gcc benchmarks.c -o benchmarks -lm -mavx -mavx2 -fopenmp -O3
       - ./benchmarks
 
   - stage: build
@@ -55,5 +68,5 @@ jobs:
       - cd examples
       - /usr/local/opt/llvm/bin/clang -fopenmp -L/usr/local/opt/llvm/lib hellonoise.c -o hellonoise -lm -mavx -mavx2
       - ./hellonoise
-      - /usr/local/opt/llvm/bin/clang -fopenmp -L/usr/local/opt/llvm/lib benchmarks.c -o benchmarks -lm -mavx -mavx2
+      - /usr/local/opt/llvm/bin/clang -fopenmp -L/usr/local/opt/llvm/lib benchmarks.c -o benchmarks -lm -mavx -mavx2 -O3
       - ./benchmarks

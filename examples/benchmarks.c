@@ -18,6 +18,12 @@ int main(int argc, char* argv[]) {
   } else
     printf("AVX2 support not detected!\n");
   printf("///////////////////////////////////////////////////////////////////\n");
+  if (check_simd_support(SIMD_AVX)) {
+    printf("AVX parallel time: %f\n", run_benchmark(&perlin_noise_eval_3d_avx, &perlin_noise, size_x, size_y, size_z, true));
+    printf("AVX single thread time: %f\n", run_benchmark(&perlin_noise_eval_3d_avx, &perlin_noise, size_x, size_y, size_z, false));
+  } else
+    printf("AVX support not detected!\n");
+  printf("///////////////////////////////////////////////////////////////////\n");
 #else
 // ARM Neon
 #endif
