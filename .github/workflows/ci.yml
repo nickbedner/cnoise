@@ -2,6 +2,7 @@
 name: CI
 on: [push]
 jobs:
+# Windows build TBD clang-cl/cl
 
   build-osx:
     runs-on: macOS-latest
@@ -13,17 +14,6 @@ jobs:
       run: clang examples/hellonoise.c -o examples/hellonoise -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 && ./examples/hellonoise
     - name: Build benchmarks
       run: clang examples/benchmarks.c -o examples/benchmarks -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 -O3 && ./examples/benchmarks
-      
-  build-windows-clang:
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v1
-#    - name: Install dependencies
-#      run: choco install visualstudio2019-workload-vctools -y
-    - name: Build hellonoise
-      run: 'cmd.exe /c "cl examples\hellonoise.c -o examples\hellonoise -lm -Xclang -fopenmp -mavx -mavx2 -AND ./examples/hellonoise"'
-    - name: Build benchmarks
-      run: clang-cl examples\benchmarks.c -o examples\benchmarks -lm -Xclang -fopenmp -mavx -mavx2 -O3 -AND ./examples/benchmarks
       
   build-ubuntu-clang:
     runs-on: ubuntu-latest
