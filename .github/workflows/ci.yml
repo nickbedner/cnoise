@@ -21,7 +21,7 @@ jobs:
 #    - name: Install dependencies
 #      run: choco install visualstudio2019-workload-vctools -y
     - name: Build hellonoise
-      run: '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Common7\IDE\CommonExtensions\Microsoft\Llvm\bin\clang-cl.exe" examples\hellonoise.c -o examples\hellonoise -lm -Xclang -fopenmp -mavx -mavx2 -AND ./examples/hellonoise'
+      run: 'cmd.exe /c "C:\Program Files (x86)\Microsoft Visual Studio\2019\Common7\IDE\CommonExtensions\Microsoft\Llvm\bin\clang-cl.exe" examples\hellonoise.c -o examples\hellonoise -lm -Xclang -fopenmp -mavx -mavx2 -AND ./examples/hellonoise'
     - name: Build benchmarks
       run: clang-cl examples\benchmarks.c -o examples\benchmarks -lm -Xclang -fopenmp -mavx -mavx2 -O3 -AND ./examples/benchmarks
       
