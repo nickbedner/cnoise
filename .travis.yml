@@ -6,6 +6,8 @@ notifications:
 jobs:
   - stage: build
     os: windows
+    arch: amd64
+    compiler: clang
     script:
       - cd examples
       - cl hellonoise.c -o hellonoise -lm -fopenmp
