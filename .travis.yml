@@ -6,17 +6,6 @@ notifications:
 jobs:
   include:
   - stage: build
-    os: windows
-    arch: amd64
-    compiler: cl
-    script:
-      - cd examples
-      - cl hellonoise.c -o hellonoise -lm -mavx -mavx2 -fopenmp
-      - ./hellonoise
-      - cl benchmarks.c -o benchmarks -lm -mavx -mavx2 -fopenmp -O3
-      - ./benchmarks
-
-  - stage: build
     os: linux
     arch: arm64
     compiler: clang
