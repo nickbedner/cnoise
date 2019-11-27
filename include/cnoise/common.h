@@ -38,9 +38,9 @@
 #endif
 #endif
 
-#ifdef __APPLE__
-#define _mm256_set_m128i(hi, lo) _mm256_insertf128_si256(_mm256_castsi128_si256(lo), hi, 1)
-#endif
+//#ifdef __APPLE__
+//#define _mm256_set_m128i(hi, lo) _mm256_insertf128_si256(_mm256_castsi128_si256(lo), hi, 1)
+//#endif
 
 enum NoiseQuality {
   QUALITY_FAST,
