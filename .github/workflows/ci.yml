@@ -22,11 +22,11 @@ jobs:
 #      run: choco install llvm
     - name: Build hellonoise
       run: |
-        C:\Program Files (x86)\Microsoft Visual Studio\2019\Common7\IDE\CommonExtensions\Microsoft\Llvm\bin\clang-cl examples/hellonoise.c -o examples/hellonoise -lm -Xclang -fopenmp -mavx -mavx2
+        C:/Program Files (x86)/Microsoft Visual Studio/2019/Common7/IDE/CommonExtensions/Microsoft/Llvm/bin/clang-cl examples/hellonoise.c -o examples/hellonoise -lm -Xclang -fopenmp -mavx -mavx2
         ./examples/hellonoise
     - name: Build benchmarks
       run: |
-        C:\Program Files (x86)\Microsoft Visual Studio\2019\Common7\IDE\CommonExtensions\Microsoft\Llvm\bin\clang-cl examples/benchmarks.c -o examples/benchmarks -lm -Xclang -fopenmp -mavx -mavx2 -O3 
+        C:/Program Files (x86)/Microsoft Visual Studio/2019/Common7/IDE/CommonExtensions/Microsoft/Llvm/bin/clang-cl examples/benchmarks.c -o examples/benchmarks -lm -Xclang -fopenmp -mavx -mavx2 -O3 
         ./examples/benchmarks
       
   build-ubuntu-clang:
