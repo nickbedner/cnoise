@@ -4,8 +4,11 @@ notifications:
   email: false
 
 jobs:
+  include:
   - stage: build
     os: windows
+    arch: amd64
+    compiler: cl
     script:
       - cd examples
       - cl hellonoise.c -o hellonoise -lm -fopenmp
@@ -13,7 +16,6 @@ jobs:
       - cl benchmarks.c -o benchmarks -lm -fopenmp -O3
       - ./benchmarks
 
-  include:
   - stage: build
     os: linux
     arch: arm64
