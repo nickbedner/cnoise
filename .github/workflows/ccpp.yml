@@ -1,0 +1,22 @@
+
+name: CI
+on: [push]
+jobs:
+   
+  build-osx:
+    runs-on: macOS-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: build hellonoise
+      run: clang examples/hellonoise.c -o examples/hellonoise -lm -fopenmp -mavx -mavx2 && ./examples/hellonoise
+    - name: build benchmarks
+      run: clang examples/benchmarks.c -o examples/benchmarks -lm -fopenmp -mavx -mavx2 && ./examples/benchmarks
+    
+  build-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: build hellonoise
+      run: clang examples/hellonoise.c -o examples/hellonoise -lm -fopenmp=libiomp5 -mavx -mavx2 && ./examples/hellonoise
+    - name: build benchmarks
+      run: clang examples/benchmarks.c -o examples/benchmarks -lm -fopenmp=libiomp5 -mavx -mavx2 && ./examples/benchmarks
