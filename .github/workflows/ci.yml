@@ -14,17 +14,19 @@ jobs:
     - name: Build benchmarks
       run: clang examples/benchmarks.c -o examples/benchmarks -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 -O3 && ./examples/benchmarks
       
-  build-windows:
+  build-windows-clang:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v1
+    - name: Install dependencies
+        choco install llvm
     - name: Build hellonoise
       run: |
-        cl examples/hellonoise.c -o examples/hellonoise -lm -fopenmp -mavx -mavx2
+        clang-cl examples/hellonoise.c -o examples/hellonoise -lm -Xclang -fopenmp -mavx -mavx2
         ./examples/hellonoise
     - name: Build benchmarks
       run: |
-        cl examples/benchmarks.c -o examples/benchmarks -lm -fopenmp -mavx -mavx2 -O3 
+        clang-cl examples/benchmarks.c -o examples/benchmarks -lm -Xclang -fopenmp -mavx -mavx2 -O3 
         ./examples/benchmarks
       
   build-ubuntu-clang:
