@@ -7,7 +7,7 @@ jobs:
   - stage: build
     os: windows
     arch: amd64
-    compiler: clang
+    compiler: cl
     script:
       - cd examples
       - cl hellonoise.c -o hellonoise -lm -fopenmp
