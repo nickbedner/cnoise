@@ -18,12 +18,11 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v1
-#    - name: Install dependencies
-#      run: choco install llvm
+    - name: Install dependencies
+      run: choco install llvm
     - name: Build hellonoise
       run: |
-        vcvarsall.bat
-        clang-cl examples\hellonoise.c -o examples\hellonoise -lm -Xclang -fopenmp -mavx -mavx2
+        %ProgramFiles%\LLVM\bin\clang-cl examples\hellonoise.c -o examples\hellonoise -lm -Xclang -fopenmp -mavx -mavx2
         ./examples/hellonoise
     - name: Build benchmarks
       run: |
