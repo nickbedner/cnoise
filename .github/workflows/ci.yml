@@ -6,8 +6,8 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v1
-    - name: Run dev tools
-      run: vcvars64.bat
+    - name: Install dependencies
+      run: choco install visualstudio2019-workload-vctools -y -AND vcvars64.bat
     - name: Build hellonoise
       run: cl examples/hellonoise.c -o examples/hellonoise -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 -AND ./examples/hellonoise
     - name: Build benchmarks
