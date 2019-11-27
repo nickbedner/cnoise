@@ -19,7 +19,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Install dependencies
-        choco install llvm
+      run: choco install llvm
     - name: Build hellonoise
       run: |
         clang-cl examples/hellonoise.c -o examples/hellonoise -lm -Xclang -fopenmp -mavx -mavx2
