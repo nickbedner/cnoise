@@ -8,11 +8,11 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Install dependencies
-      run: brew install llvm libomp
+      run: brew install libomp
     - name: Build hellonoise
-      run: clang examples/hellonoise.c -o examples/hellonoise -lm -fopenmp -mavx -mavx2 && ./examples/hellonoise
+      run: clang examples/hellonoise.c -o examples/hellonoise -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 && ./examples/hellonoise
     - name: Build benchmarks
-      run: clang examples/benchmarks.c -o examples/benchmarks -lm -fopenmp -mavx -mavx2 && ./examples/benchmarks
+      run: clang examples/benchmarks.c -o examples/benchmarks -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 && ./examples/benchmarks
     
   build-ubuntu:
     runs-on: ubuntu-latest
