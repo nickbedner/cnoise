@@ -2,7 +2,16 @@
 name: CI
 on: [push]
 jobs:
-# Windows build TBD clang-cl/cl
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Run dev tools
+      run: vcvars64.bat
+    - name: Build hellonoise
+      run: cl examples/hellonoise.c -o examples/hellonoise -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 -AND ./examples/hellonoise
+    - name: Build benchmarks
+      run: cl examples/benchmarks.c -o examples/benchmarks -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 -O3 -AND ./examples/benchmarks
 
   build-osx:
     runs-on: macOS-latest
