@@ -14,17 +14,17 @@ jobs:
     - name: Build benchmarks
       run: clang examples/benchmarks.c -o examples/benchmarks -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 -O3 && ./examples/benchmarks
       
-  build-windows-clang:
+  build-windows:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v1
     - name: Build hellonoise
       run: |
-        msvc examples/hellonoise.c -o examples/hellonoise -lm -fopenmp -mavx -mavx2
+        cl examples/hellonoise.c -o examples/hellonoise -lm -fopenmp -mavx -mavx2
         ./examples/hellonoise
     - name: Build benchmarks
       run: |
-        msvc examples/benchmarks.c -o examples/benchmarks -lm -fopenmp -mavx -mavx2 -O3 
+        cl examples/benchmarks.c -o examples/benchmarks -lm -fopenmp -mavx -mavx2 -O3 
         ./examples/benchmarks
       
   build-ubuntu-clang:
@@ -38,24 +38,6 @@ jobs:
       
   build-ubuntu-gcc:
     runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
-    - name: Build hellonoise
-      run: gcc examples/hellonoise.c -o examples/hellonoise -lm -fopenmp -mavx -mavx2 && ./examples/hellonoise
-    - name: Build benchmarks
-      run: gcc examples/benchmarks.c -o examples/benchmarks -lm -fopenmp -mavx -mavx2 -O3 && ./examples/benchmarks
-      
-  build-ubuntu-clang-arm:
-    runs-on: ARM32
-    steps:
-    - uses: actions/checkout@v1
-    - name: Build hellonoise
-      run: clang examples/hellonoise.c -o examples/hellonoise -lm -fopenmp=libiomp5 -mavx -mavx2 && ./examples/hellonoise
-    - name: Build benchmarks
-      run: clang examples/benchmarks.c -o examples/benchmarks -lm -fopenmp=libiomp5 -mavx -mavx2 -O3 && ./examples/benchmarks
-      
-  build-ubuntu-gcc-arm:
-    runs-on: ARM32
     steps:
     - uses: actions/checkout@v1
     - name: Build hellonoise
