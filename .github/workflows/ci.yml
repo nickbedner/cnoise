@@ -2,7 +2,7 @@
 name: CI
 on: [push]
 jobs:
-   
+
   build-osx:
     runs-on: macOS-latest
     steps:
@@ -12,13 +12,50 @@ jobs:
     - name: Build hellonoise
       run: clang examples/hellonoise.c -o examples/hellonoise -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 && ./examples/hellonoise
     - name: Build benchmarks
-      run: clang examples/benchmarks.c -o examples/benchmarks -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 && ./examples/benchmarks
-    
-  build-ubuntu:
+      run: clang examples/benchmarks.c -o examples/benchmarks -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 -O3 && ./examples/benchmarks
+      
+  build-windows-clang:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build hellonoise
+      run: clang-cl examples/hellonoise.c -o examples/hellonoise -lm -Xclang -fopenmp -mavx -mavx2 && ./examples/hellonoise
+    - name: Build benchmarks
+      run: clang-cl examples/benchmarks.c -o examples/benchmarks -lm -Xclang -fopenmp -mavx -mavx2 -O3 && ./examples/benchmarks
+      
+  build-ubuntu-clang:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
     - name: Build hellonoise
       run: clang examples/hellonoise.c -o examples/hellonoise -lm -fopenmp=libiomp5 -mavx -mavx2 && ./examples/hellonoise
     - name: Build benchmarks
-      run: clang examples/benchmarks.c -o examples/benchmarks -lm -fopenmp=libiomp5 -mavx -mavx2 && ./examples/benchmarks
+      run: clang examples/benchmarks.c -o examples/benchmarks -lm -fopenmp=libiomp5 -mavx -mavx2 -O3 && ./examples/benchmarks
+      
+  build-ubuntu-gcc:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build hellonoise
+      run: gcc examples/hellonoise.c -o examples/hellonoise -lm -fopenmp -mavx -mavx2 && ./examples/hellonoise
+    - name: Build benchmarks
+      run: gcc examples/benchmarks.c -o examples/benchmarks -lm -fopenmp -mavx -mavx2 -O3 && ./examples/benchmarks
+      
+  build-ubuntu-clang-arm:
+    runs-on: [ubuntu-latest, ARM32]
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build hellonoise
+      run: clang examples/hellonoise.c -o examples/hellonoise -lm -fopenmp=libiomp5 -mavx -mavx2 && ./examples/hellonoise
+    - name: Build benchmarks
+      run: clang examples/benchmarks.c -o examples/benchmarks -lm -fopenmp=libiomp5 -mavx -mavx2 -O3 && ./examples/benchmarks
+      
+  build-ubuntu-gcc-arm:
+    runs-on: [ubuntu-latest, ARM32]
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build hellonoise
+      run: gcc examples/hellonoise.c -o examples/hellonoise -lm -fopenmp -mavx -mavx2 && ./examples/hellonoise
+    - name: Build benchmarks
+      run: gcc examples/benchmarks.c -o examples/benchmarks -lm -fopenmp -mavx -mavx2 -O3 && ./examples/benchmarks
+      
