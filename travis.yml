@@ -1,0 +1,44 @@
+language: c
+
+notifications:
+  email: false
+
+jobs:
+  - stage: build
+    os: windows
+    arch: amd64
+    compiler: cl
+    script:
+      - cd examples
+      - cl hellonoise.c -o hellonoise -lm -fopenmp
+      - ./hellonoise
+      - cl benchmarks.c -o benchmarks -lm -fopenmp -O3
+      - ./benchmarks
+
+  include:
+  - stage: build
+    os: linux
+    arch: arm64
+    compiler: clang
+    sudo: true
+    before_install: sudo apt-get install libomp-dev
+    script:
+      - cd examples
+      - clang hellonoise.c -o hellonoise -lm -fopenmp=libiomp5
+      - ./hellonoise
+      - clang benchmarks.c -o benchmarks -lm -fopenmp=libiomp5 -O3
+      - ./benchmarks
+
+  - stage: build
+    os: linux
+    arch: arm64
+    compiler: gcc
+    sudo: true
+    before_install: sudo apt-get install libomp-dev
+    script:
+      - cd examples
+      - gcc hellonoise.c -o hellonoise -lm -fopenmp
+      - ./hellonoise
+      - gcc benchmarks.c -o benchmarks -lm -fopenmp -O3
+      - ./benchmarks
+
