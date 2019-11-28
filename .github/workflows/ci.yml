@@ -2,52 +2,49 @@
 name: CI
 on: [push]
 jobs:
-  build-windows:
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v1
-#    - name: Install dependencies
-#      run: choco install visualstudio2019-workload-vctools -y
-#    - name: Run dev rools
-#      run: 'cmd.exe \c "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat"'
-#    - name: Build hellonoise
-#      run: cl examples/hellonoise.c -o examples/hellonoise -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 && ./examples/hellonoise
-#    - name: Build benchmarks
-#      run: cl examples/benchmarks.c -o examples/benchmarks -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 -O3 && ./examples/benchmarks
-#    - name: Build hellonoise
-#      run: 'cmd.exe /c "`"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat`" && cl examples\ellonoise.c /out:examples\hellonoise -lm /openmp /arch:avx2 && examples\hellonoise.exe"'
-#    - name: Build benchmarks
-#      run: cl examples/benchmarks.c -o examples/benchmarks -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 -O3 && ./examples/benchmarks
-    - name: Build all
-      run: 'cmd.exe /c "`"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat`" && mkdir examples\build && cd examples\build && cmake -G `"Visual Studio 16 2019`" ../../ && MSBuild Benchmarks.sln && Debug\hellonoise.exe"'
-
-
   build-osx:
     runs-on: macOS-latest
     steps:
     - uses: actions/checkout@v1
     - name: Install dependencies
       run: brew install libomp
-    - name: Build hellonoise
-      run: clang examples/hellonoise.c -o examples/hellonoise -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 && ./examples/hellonoise
-    - name: Build benchmarks
-      run: clang examples/benchmarks.c -o examples/benchmarks -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 -O3 && ./examples/benchmarks
+    - name: Build all
+      run: mkdir examples/build && cd examples/build && cmake ../../ && make
+    - name: Run hellonoise
+      run: ./examples/build/Debug/hellonoise
+    - name: Run benchmarks
+      run: ./examples/build/Debug/benchmarks
+      
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build all
+      run: 'cmd.exe /c "`"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat`" && mkdir examples\build && cd examples\build && cmake -G `"Visual Studio 16 2019`" ../../ && MSBuild Benchmarks.sln"'
+    - name: Run hellonoise
+      run: examples\build\Debug\hellonoise.exe
+    - name: Run benchmarks
+      run: examples\build\Debug\benchmarks.exe
       
   build-ubuntu-clang:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: Build hellonoise
-      run: clang examples/hellonoise.c -o examples/hellonoise -lm -fopenmp=libiomp5 -mavx -mavx2 && ./examples/hellonoise
-    - name: Build benchmarks
-      run: clang examples/benchmarks.c -o examples/benchmarks -lm -fopenmp=libiomp5 -mavx -mavx2 -O3 && ./examples/benchmarks
+    - name: Build all
+      run: 'mkdir examples/build && cd examples/build && cmake -G "clang" ../../ && make'
+    - name: Run hellonoise
+      run: ./examples/hellonoise
+    - name: Run benchmarks
+      run: ./examples/benchmarks
       
   build-ubuntu-gcc:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: Build hellonoise
-      run: gcc examples/hellonoise.c -o examples/hellonoise -lm -fopenmp -mavx -mavx2 && ./examples/hellonoise
-    - name: Build benchmarks
-      run: gcc examples/benchmarks.c -o examples/benchmarks -lm -fopenmp -mavx -mavx2 -O3 && ./examples/benchmarks
+    - name: Build all
+      run: 'mkdir examples/build && cd examples/build && cmake -G "gcc" ../../ && make'
+    - name: Run hellonoise
+      run: ./examples/build/Debug/hellonoise
+    - name: Run benchmarks
+      run: ./examples/build/Debug/benchmarks
       
