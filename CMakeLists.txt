@@ -4,7 +4,7 @@ set(ignoreMe "${CMAKE_CXX_COMPILER}")
 set(CMAKE_C_STANDARD 11)
 
 if (WIN32)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /arch:AVX /arch:AVX2 /openmp")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /arch:AVX /arch:AVX2")
 else()
         find_package(OpenMP)
         if (OPENMP_FOUND)
