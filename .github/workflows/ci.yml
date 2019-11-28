@@ -2,7 +2,25 @@
 name: CI
 on: [push]
 jobs:
-# Windows build TBD clang-cl/cl
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v1
+#    - name: Install dependencies
+#      run: choco install visualstudio2019-workload-vctools -y
+#    - name: Run dev rools
+#      run: 'cmd.exe \c "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat"'
+#    - name: Build hellonoise
+#      run: cl examples/hellonoise.c -o examples/hellonoise -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 && ./examples/hellonoise
+#    - name: Build benchmarks
+#      run: cl examples/benchmarks.c -o examples/benchmarks -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 -O3 && ./examples/benchmarks
+#    - name: Build hellonoise
+#      run: 'cmd.exe /c "`"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat`" && cl examples\ellonoise.c /out:examples\hellonoise -lm /openmp /arch:avx2 && examples\hellonoise.exe"'
+#    - name: Build benchmarks
+#      run: cl examples/benchmarks.c -o examples/benchmarks -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 -O3 && ./examples/benchmarks
+    - name: Build all
+      run: 'cmd.exe /c "`"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat`" && mkdir examples\build && cd examples\build && cmake -G `"Visual Studio 16 2019`" . && MSBuild Benchmarks.sln && Debug\hellonoise.exe"'
+
 
   build-osx:
     runs-on: macOS-latest
