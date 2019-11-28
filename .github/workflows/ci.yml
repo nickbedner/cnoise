@@ -7,9 +7,9 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Install dependencies
-      run: brew install llvm libomp
+      run: brew install libomp
     - name: Build all
-      run: mkdir examples/build && cd examples/build && cmake -D CMAKE_C_COMPILER=/usr/local/opt/llvm/bin/clang ../../ && make
+      run: mkdir examples/build && cd examples/build && cmake -D CMAKE_C_COMPILER=clang ../../ && make
     - name: Run hellonoise
       run: ./Debug/HelloNoise
     - name: Run benchmarks
