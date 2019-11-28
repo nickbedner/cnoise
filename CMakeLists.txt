@@ -18,10 +18,8 @@ add_executable(Benchmarks ${benchmarks_SRC})
 
 if (WIN32)
 # Add OpenMP
-        target_compile_options(Benchmarks PRIVATE /O2)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /arch:AVX /arch:AVX2")
 else()
-        target_compile_options(Benchmarks PRIVATE -O3)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mavx -mavx2")
         find_package(OpenMP)
         if (OPENMP_FOUND)
@@ -30,6 +28,7 @@ else()
 endif()
 
 if(APPLE)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Xpreprocessor")
         target_link_libraries(HelloNoise omp)
         target_link_libraries(Benchmarks omp)
 endif()
