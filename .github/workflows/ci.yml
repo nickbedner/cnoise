@@ -7,7 +7,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Install dependencies
-      run: brew install llvm
+      run: brew install llvm libomp
     - name: Build all
       run: echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> ~/.bash_profile && mkdir examples/build && cd examples/build && cmake -D CMAKE_C_COMPILER=clang ../../ && make
     - name: Run hellonoise
