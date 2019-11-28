@@ -16,32 +16,25 @@ file(GLOB_RECURSE benchmarks_SRC
 add_executable(HelloNoise ${hello_noise_SRC})
 add_executable(Benchmarks ${benchmarks_SRC})
 
-#if (WIN32)
-#        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /O2")
-#else()
-#        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
-#endif()
-
-
-
 if (WIN32)
 # Add OpenMP
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /arch:AVX /arch:AVX2")
+        target_compile_options(Benchmarks PUBLIC "${CMAKE_C_FLAGS} /O2")
+else()
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mavx -mavx2")
+        find_package(OpenMP)
+        if (OPENMP_FOUND)
+                set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+        endif()
+        target_compile_options(Benchmarks PUBLIC "${CMAKE_C_FLAGS} -O3")
 endif()
 
 if(APPLE)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mavx -mavx2 -fopenmp")
         target_link_libraries(HelloNoise omp)
         target_link_libraries(Benchmarks omp)
 endif()
 
 if(UNIX AND NOT APPLE)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lm -mavx -mavx2")
-        if(CMAKE_C_COMPILER MATCHES "clang")
-                set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fopenmp=libiomp5")
-        else()
-                set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fopenmp")
-        endif()
         target_link_libraries(HelloNoise m)
         target_link_libraries(Benchmarks m)
 endif()
