@@ -6,10 +6,10 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v1
-    - name: Install dependencies
-      run: choco install visualstudio2019-workload-vctools -y
+#    - name: Install dependencies
+#      run: choco install visualstudio2019-workload-vctools -y
     - name: Run dev rools
-      run: vcvars64.bat
+      run: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat'
     - name: Build hellonoise
       run: cl examples/hellonoise.c -o examples/hellonoise -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 -AND ./examples/hellonoise
     - name: Build benchmarks
