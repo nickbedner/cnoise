@@ -31,7 +31,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Build all
-      run: 'mkdir examples/build && cd examples/build && cmake -G "clang" ../../ && make'
+      run: 'mkdir examples/build && cd examples/build && cmake -G "Unix Makefiles" -D CMAKE_C_COMPILER=clang ../../ && make'
     - name: Run hellonoise
       run: ./examples/hellonoise
     - name: Run benchmarks
@@ -42,7 +42,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Build all
-      run: 'mkdir examples/build && cd examples/build && cmake -G "gcc" ../../ && make'
+      run: 'mkdir examples/build && cd examples/build && cmake -G "Unix Makefiles" -D CMAKE_C_COMPILER=gcc ../../ && make'
     - name: Run hellonoise
       run: ./examples/build/Debug/hellonoise
     - name: Run benchmarks
