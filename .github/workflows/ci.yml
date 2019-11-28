@@ -9,7 +9,7 @@ jobs:
     - name: Install dependencies
       run: brew install libomp
     - name: Build all
-      run: mkdir examples/build && cs examples/build && cmake ../../ && make
+      run: mkdir examples/build && cd examples/build && cmake ../../ && make
     - name: Run hellonoise
       run: ./examples/build/Debug/hellonoise
     - name: Run benchmarks
@@ -31,7 +31,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Build all
-      run: 'mkdir examples/build && cs examples/build && cmake -G "clang" ../../ && make'
+      run: 'mkdir examples/build && cd examples/build && cmake -G "clang" ../../ && make'
     - name: Run hellonoise
       run: ./examples/hellonoise
     - name: Run benchmarks
@@ -42,7 +42,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Build all
-      run: 'mkdir examples/build && cs examples/build && cmake -G "gcc" ../../ && make'
+      run: 'mkdir examples/build && cd examples/build && cmake -G "gcc" ../../ && make'
     - name: Run hellonoise
       run: ./examples/build/Debug/hellonoise
     - name: Run benchmarks
