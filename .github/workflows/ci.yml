@@ -19,7 +19,7 @@ jobs:
 #    - name: Build benchmarks
 #      run: cl examples/benchmarks.c -o examples/benchmarks -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 -O3 && ./examples/benchmarks
     - name: Build all
-      run: 'cmd.exe /c "`"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat`" && mkdir examples\build && cd examples\build && cmake -G `"Visual Studio 16 2019`" . && MSBuild Benchmarks.sln && Debug\hellonoise.exe"'
+      run: 'cmd.exe /c "`"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat`" && mkdir examples\build && cd examples\build && cmake -G `"Visual Studio 16 2019`" ../../ && MSBuild Benchmarks.sln && Debug\hellonoise.exe"'
 
 
   build-osx:
