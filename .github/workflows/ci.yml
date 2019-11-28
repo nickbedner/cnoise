@@ -7,7 +7,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Install dependencies
-      run: brew install openmp
+      run: brew install libomp
     - name: Build all
       run: mkdir examples/build && cd examples/build && cmake -D CMAKE_C_COMPILER=clang ../../ && make
     - name: Run hellonoise
@@ -33,7 +33,7 @@ jobs:
     - name: Build all
       run: 'mkdir examples/build && cd examples/build && cmake -G "Unix Makefiles" -D CMAKE_C_COMPILER=clang ../../ && make && ls'
     - name: Run hellonoise
-      run: ls && ./HelloNoise
+      run: cd examples/build && ls && ./HelloNoise
     - name: Run benchmarks
       run: ./Benchmarks
       
@@ -44,7 +44,7 @@ jobs:
     - name: Build all
       run: 'mkdir examples/build && cd examples/build && cmake -G "Unix Makefiles" -D CMAKE_C_COMPILER=gcc ../../ && make'
     - name: Run hellonoise
-      run: ls && ./Debug/HelloNoise
+      run: cd examples/build && ls && ./Debug/HelloNoise
     - name: Run benchmarks
       run: ./Debug/Benchmarks
       
