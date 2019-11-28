@@ -9,14 +9,14 @@ if (WIN32)
 endif()
 
 if(APPLE)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mavx -mavx2 -fopenmp")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lm -mavx -mavx2 -fopenmp")
 endif()
 
 if(UNIX AND NOT APPLE)
         if(CMAKE_C_COMPILER MATCHES "clang")
-                set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mavx -mavx2 -fopenmp=libiomp5")
+                set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lm -mavx -mavx2 -fopenmp=libiomp5")
         else()
-                set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mavx -mavx2 -fopenmp")
+                set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lm -mavx -mavx2 -fopenmp")
         endif() 
 endif()
 
