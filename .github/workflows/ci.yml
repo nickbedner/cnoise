@@ -8,10 +8,12 @@ jobs:
     - uses: actions/checkout@v1
     - name: Install dependencies
       run: brew install libomp
-    - name: Build hellonoise
-      run: clang examples/hellonoise.c -o examples/hellonoise -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 && ./examples/hellonoise
-    - name: Build benchmarks
-      run: clang examples/benchmarks.c -o examples/benchmarks -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 -O3 && ./examples/benchmarks
+    - name: Build all
+      run: mkdir examples/build && cs examples/build && cmake ../../ && make
+    - name: Run hellonoise
+      run: ./examples/build/Debug/hellonoise
+    - name: Run benchmarks
+      run: ./examples/build/Debug/benchmarks
       
   build-windows:
     runs-on: windows-latest
@@ -28,17 +30,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: Build hellonoise
-      run: clang examples/hellonoise.c -o examples/hellonoise -lm -fopenmp=libiomp5 -mavx -mavx2 && ./examples/hellonoise
-    - name: Build benchmarks
-      run: clang examples/benchmarks.c -o examples/benchmarks -lm -fopenmp=libiomp5 -mavx -mavx2 -O3 && ./examples/benchmarks
+    - name: Build all
+      run: 'mkdir examples/build && cs examples/build && cmake -G "clang" ../../ && make'
+    - name: Run hellonoise
+      run: ./examples/hellonoise
+    - name: Run benchmarks
+      run: ./examples/benchmarks
       
   build-ubuntu-gcc:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: Build hellonoise
-      run: gcc examples/hellonoise.c -o examples/hellonoise -lm -fopenmp -mavx -mavx2 && ./examples/hellonoise
-    - name: Build benchmarks
-      run: gcc examples/benchmarks.c -o examples/benchmarks -lm -fopenmp -mavx -mavx2 -O3 && ./examples/benchmarks
+    - name: Build all
+      run: 'mkdir examples/build && cs examples/build && cmake -G "gcc" ../../ && make'
+    - name: Run hellonoise
+      run: ./examples/build/Debug/hellonoise
+    - name: Run benchmarks
+      run: ./examples/build/Debug/benchmarks
       
