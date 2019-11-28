@@ -33,9 +33,9 @@ jobs:
     - name: Build all
       run: 'mkdir examples/build && cd examples/build && cmake -G "Unix Makefiles" -D CMAKE_C_COMPILER=clang ../../ && make && ls'
     - name: Run hellonoise
-      run: cd examples/build && ls && ./HelloNoise
+      run: ./examples/build/HelloNoise
     - name: Run benchmarks
-      run: ./Benchmarks
+      run: ./examples/build/Benchmarks
       
   build-ubuntu-gcc:
     runs-on: ubuntu-latest
@@ -44,7 +44,7 @@ jobs:
     - name: Build all
       run: 'mkdir examples/build && cd examples/build && cmake -G "Unix Makefiles" -D CMAKE_C_COMPILER=gcc ../../ && make'
     - name: Run hellonoise
-      run: cd examples/build && ls && ./Debug/HelloNoise
+      run: ./examples/build/HelloNoise
     - name: Run benchmarks
-      run: ./Debug/Benchmarks
+      run: ./examples/build/Benchmarks
       
