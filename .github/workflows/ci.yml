@@ -15,7 +15,7 @@ jobs:
 #    - name: Build benchmarks
 #      run: cl examples/benchmarks.c -o examples/benchmarks -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 -O3 && ./examples/benchmarks
     - name: Build hellonoise
-      run: 'cmd.exe \c "`"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat`" && cl examples/hellonoise.c -o examples/hellonoise -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 && ./examples/hellonoise"'
+      run: 'cmd.exe /c "`"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat`" && cl examples/hellonoise.c -o examples/hellonoise -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 && ./examples/hellonoise"'
     - name: Build benchmarks
       run: cl examples/benchmarks.c -o examples/benchmarks -lm -Xpreprocessor -fopenmp -lomp -mavx -mavx2 -O3 && ./examples/benchmarks
 
