@@ -29,8 +29,8 @@ endif()
 
 if(APPLE)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Xpreprocessor")
-        target_link_libraries(HelloNoise omp)
-        target_link_libraries(Benchmarks omp)
+        target_link_libraries(HelloNoise m omp)
+        target_link_libraries(Benchmarks m omp)
 endif()
 
 if(UNIX AND NOT APPLE)
