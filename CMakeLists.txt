@@ -9,7 +9,7 @@ if (WIN32)
 endif()
 
 if(APPLE)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lm -mavx -mavx2 -fopenmp")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lm -Xpreprocessor -mavx -mavx2 -fopenmp -lomp")
 endif()
 
 if(UNIX AND NOT APPLE)
