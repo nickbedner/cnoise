@@ -13,10 +13,11 @@ if(APPLE)
 endif()
 
 if(UNIX AND NOT APPLE)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lm -mavx -mavx2")
         if(CMAKE_C_COMPILER MATCHES "clang")
-                set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lm -mavx -mavx2 -fopenmp=libiomp5")
+                set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fopenmp=libiomp5")
         else()
-                set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lm -mavx -mavx2 -fopenmp")
+                set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fopenmp")
         endif() 
 endif()
 
