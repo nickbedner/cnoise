@@ -4,12 +4,20 @@ set(ignoreMe "${CMAKE_CXX_COMPILER}")
 set(CMAKE_C_STANDARD 11)
 
 if (WIN32)
+# Add OpenMP
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /arch:AVX /arch:AVX2")
-else()
-        find_package(OpenMP)
-        if (OPENMP_FOUND)
-                set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mavx -mavx2 ${OpenMP_C_FLAGS}")
-        endif()
+endif()
+
+if(APPLE)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mavx -mavx2 -fopenmp")
+endif()
+
+if(UNIX AND NOT APPLE)
+        if(CMAKE_C_COMPILER MATCHES "clang")
+                set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mavx -mavx2 -fopenmp=libiomp5")
+        else()
+                set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mavx -mavx2 -fopenmp")
+        endif() 
 endif()
 
 set(includeList ${CMAKE_CURRENT_SOURCE_DIR}/include)
