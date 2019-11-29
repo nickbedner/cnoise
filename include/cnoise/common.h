@@ -128,7 +128,7 @@ static inline int detect_simd_support() {
     xcr_feature_mask = xgetbv(_XCR_XFEATURE_ENABLED_MASK);
 
 #if defined(__APPLE__) && !defined(_mm256_set_m128i)
-  bool avx_supported = false;
+  avx_supported = false;
 #endif
 
   cpuid(cpu_info, 7);
@@ -173,7 +173,7 @@ static inline bool check_simd_support(int instruction_type) {
     xcr_feature_mask = xgetbv(_XCR_XFEATURE_ENABLED_MASK);
 
 #if defined(__APPLE__) && !defined(_mm256_set_m128i)
-  bool avx_supported = false;
+  avx_supported = false;
 #endif
 
   cpuid(cpu_info, 7);
