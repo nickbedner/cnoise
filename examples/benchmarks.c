@@ -14,6 +14,7 @@ int main(int argc, char* argv[]) {
   // Warm-up tests to prevent delay on first allocation
   printf("Warm-up time 1: %f\n", run_benchmark(&perlin_noise_eval_3d_fallback, &perlin_noise, size_x, size_y, size_z, false));
   printf("Warm-up time 2: %f\n", run_benchmark(&perlin_noise_eval_3d_fallback, &perlin_noise, size_x, size_y, size_z, true));
+  printf("///////////////////////////////////////////////////////////////////\n");
 
 #ifdef ARCH_32_64
   if (check_simd_support(SIMD_AVX2)) {
@@ -22,6 +23,7 @@ int main(int argc, char* argv[]) {
   } else
     printf("AVX2 support not detected!\n");
   printf("///////////////////////////////////////////////////////////////////\n");
+
   if (check_simd_support(SIMD_AVX)) {
     printf("AVX parallel time: %f\n", run_benchmark(&perlin_noise_eval_3d_avx, &perlin_noise, size_x, size_y, size_z, true));
     printf("AVX single thread time: %f\n", run_benchmark(&perlin_noise_eval_3d_avx, &perlin_noise, size_x, size_y, size_z, false));
