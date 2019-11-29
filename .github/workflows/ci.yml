@@ -2,7 +2,7 @@
 name: CI
 on: [push]
 jobs:
-  build-osx:
+  build-osx-appleclang:
     runs-on: macOS-latest
     steps:
     - uses: actions/checkout@v1
@@ -10,6 +10,19 @@ jobs:
       run: brew install libomp
     - name: Build all
       run: mkdir examples/build && cd examples/build && cmake -D CMAKE_C_COMPILER=clang ../../ && make
+    - name: Run hellonoise
+      run: ./examples/build/HelloNoise
+    - name: Run benchmarks
+      run: ./examples/build/Benchmarks
+      
+  build-osx-clang:
+    runs-on: macOS-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install dependencies
+      run: brew install llvm libomp
+    - name: Build all
+      run: mkdir examples/build && cd examples/build && cmake -D CMAKE_C_COMPILER=/usr/local/opt/llvm/bin/clang ../../ && make
     - name: Run hellonoise
       run: ./examples/build/HelloNoise
     - name: Run benchmarks
