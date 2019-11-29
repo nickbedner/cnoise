@@ -24,10 +24,21 @@
 #define PLATFORM_WIN32
 #include <intrin.h>
 #define cpuid(info, x) __cpuidex(info, x, 0)
+__int64 xgetbv(unsigned int x) {
+  return _xgetbv(x);
+}
 #else
 #define PLATFORM_OTHER
 #include <cpuid.h>
 #define cpuid(info, x) __cpuid_count(x, 0, info[0], info[1], info[2], info[3])
+uint64_t xgetbv(unsigned int index) {
+  uint32_t eax, edx;
+  __asm__ __volatile__("xgetbv"
+                       : "=a"(eax), "=d"(edx)
+                       : "c"(index));
+  return ((uint64_t)edx << 32) | eax;
+}
+#define _XCR_XFEATURE_ENABLED_MASK 0
 #endif
 #endif
 
@@ -112,17 +123,21 @@ static inline int detect_simd_support() {
   bool sse2_supported = cpu_info[3] & (1 << 26) || false;
   bool sse4_1_supported = cpu_info[2] & (1 << 19) || false;
   bool avx_supported = cpu_info[2] & (1 << 28) || false;
+  bool os_xr_store = (cpu_info[2] & (1 << 27)) || false;
+  uint64_t xcr_feature_mask = 0;
+  if (os_xr_store)
+    xcr_feature_mask = xgetbv(_XCR_XFEATURE_ENABLED_MASK);
 
   cpuid(cpu_info, 7);
 
   bool avx2_supported = cpu_info[1] & (1 << 5) || false;
   bool avx512f_supported = cpu_info[1] & (1 << 16) || false;
 
-  if (avx512f_supported)
+  if (avx512f_supported && ((xcr_feature_mask & 0xe6) == 0xe6))
     return SIMD_AVX512F;
   else if (avx2_supported)
     return SIMD_AVX2;
-  else if (avx_supported)
+  else if (avx_supported && ((xcr_feature_mask & 0x6) == 0x6))
     return SIMD_AVX;
   else if (sse4_1_supported)
     return SIMD_SSE4_1;
@@ -140,27 +155,30 @@ static inline int detect_simd_support() {
 #endif
 }
 
+// TODO: Repeated code clean this up
 static inline bool check_simd_support(int instruction_type) {
 #ifdef ARCH_32_64
   int cpu_info[4];
   cpuid(cpu_info, 1);
 
-  //bool osUsesXSAVE_XRSTORE = cpuInfo[2] & (1 << 27) || false;
-
   bool sse2_supported = cpu_info[3] & (1 << 26) || false;
   bool sse4_1_supported = cpu_info[2] & (1 << 19) || false;
   bool avx_supported = cpu_info[2] & (1 << 28) || false;
+  bool os_xr_store = (cpu_info[2] & (1 << 27)) || false;
+  uint64_t xcr_feature_mask = 0;
+  if (os_xr_store)
+    xcr_feature_mask = xgetbv(_XCR_XFEATURE_ENABLED_MASK);
 
   cpuid(cpu_info, 7);
 
   bool avx2_supported = cpu_info[1] & (1 << 5) || false;
   bool avx512f_supported = cpu_info[1] & (1 << 16) || false;
 
-  if (avx512f_supported && instruction_type == SIMD_AVX512F)
+  if (avx512f_supported && ((xcr_feature_mask & 0xe6) == 0xe6) && instruction_type == SIMD_AVX512F)
     return true;
   else if (avx2_supported && instruction_type == SIMD_AVX2)
     return true;
-  else if (avx_supported && instruction_type == SIMD_AVX)
+  else if (avx_supported && ((xcr_feature_mask & 0x6) == 0x6) && instruction_type == SIMD_AVX)
     return true;
   else if (sse4_1_supported && instruction_type == SIMD_SSE4_1)
     return true;
