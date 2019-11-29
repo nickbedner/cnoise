@@ -49,10 +49,9 @@ uint64_t xgetbv(unsigned int index) {
 #endif
 #endif
 
-//#ifdef __APPLE__
-//_mm256_set_m128i
-//#define _mm256_set_m128i(hi, lo) _mm256_insertf128_si256(_mm256_castsi128_si256(lo), hi, 1)
-//#endif
+#ifdef __APPLE__
+#define _mm256_set_m128i(xmm1, xmm2) _mm256_set_epi32(_mm_extract_epi32(xmm1, 3), _mm_extract_epi32(xmm1, 2), _mm_extract_epi32(xmm1, 1), _mm_extract_epi32(xmm1, 0), _mm_extract_epi32(xmm2, 3), _mm_extract_epi32(xmm2, 2), _mm_extract_epi32(xmm2, 1), _mm_extract_epi32(xmm2, 0))
+#endif
 
 enum NoiseQuality {
   QUALITY_FAST,
@@ -127,10 +126,6 @@ static inline int detect_simd_support() {
   if (os_xr_store)
     xcr_feature_mask = xgetbv(_XCR_XFEATURE_ENABLED_MASK);
 
-  //#if defined(__APPLE__) && !defined(_mm256_set_m128i)
-  //  avx_supported = false;
-  //#endif
-
   cpuid(cpu_info, 7);
 
   bool avx2_supported = cpu_info[1] & (1 << 5) || false;
@@ -171,10 +166,6 @@ static inline bool check_simd_support(int instruction_type) {
   uint64_t xcr_feature_mask = 0;
   if (os_xr_store)
     xcr_feature_mask = xgetbv(_XCR_XFEATURE_ENABLED_MASK);
-
-  //#if defined(__APPLE__) && !defined(_mm256_set_m128i)
-  //  avx_supported = false;
-  //#endif
 
   cpuid(cpu_info, 7);
 
@@ -251,8 +242,8 @@ static inline __m256 gradient_noise_3d_avx(__m256 fx, float fy, float fz, __m256
 
   random_low = _mm_mullo_epi32(random_low, _mm_mullo_epi32(random_low, _mm_mullo_epi32(random_low, _mm_set1_epi32(60493))));
   random_high = _mm_mullo_epi32(random_high, _mm_mullo_epi32(random_high, _mm_mullo_epi32(random_high, _mm_set1_epi32(60493))));
-  //__m256 xv_gradient = _mm256_div_ps(_mm256_cvtepi32_ps(_mm256_set_m128i(random_high, random_low)), _mm256_set1_ps(2147483648.0));
-  __m256 xv_gradient = fx;
+  __m256 xv_gradient = _mm256_cvtepi32_ps(_mm256_set_m128i(random_high, random_low));
+  xv_gradient = _mm256_div_ps(xv_gradient, _mm256_set1_ps(2147483648.0));
   float yv_gradient = (random_y * random_y * random_y * 60493) / 2147483648.0;
   float zv_gradient = (random_z * random_z * random_z * 60493) / 2147483648.0;
 
@@ -266,15 +257,15 @@ static inline __m256 gradient_noise_3d_avx(__m256 fx, float fy, float fz, __m256
 static inline __m256 gradient_coherent_noise_3d_avx(__m256 x, float y, float z, int seed, enum NoiseQuality noise_quality) {
   __m256i x0 = _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_blendv_ps(_mm256_sub_ps(x, _mm256_set1_ps(1.0)), x, _mm256_cmp_ps(x, _mm256_setzero_ps(), _CMP_GT_OQ))));
   __m128i x1_low = _mm256_extractf128_si256(x0, 0);
+  x1_low = _mm_add_epi32(x1_low, _mm_set1_epi32(1));
   __m128i x1_high = _mm256_extractf128_si256(x0, 1);
-  //__m256i x1 = _mm256_set_m128i(_mm_add_epi32(x1_high, _mm_set1_epi32(1)), _mm_add_epi32(x1_low, _mm_set1_epi32(1)));
-  __m256i x1 = x0;
+  x1_high = _mm_add_epi32(x1_high, _mm_set1_epi32(1));
+
+  __m256i x1 = _mm256_set_m128i(x1_high, x1_low);
   int y0 = (y > 0.0 ? (int)y : (int)y - 1);
   int y1 = y0 + 1;
   int z0 = (z > 0.0 ? (int)z : (int)z - 1);
   int z1 = z0 + 1;
-
-  printf("Check 5\n");
 
   __m256 xs;
   float ys, zs;
