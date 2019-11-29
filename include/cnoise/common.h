@@ -50,6 +50,7 @@ uint64_t xgetbv(unsigned int index) {
 #endif
 
 #ifdef __APPLE__
+#define _mm_extract_epi32(v, n) *(((int32_t *)&v) + n)
 #define _mm256_set_m128i(xmm1, xmm2) _mm256_set_epi32(_mm_extract_epi32(xmm1, 3), _mm_extract_epi32(xmm1, 2), _mm_extract_epi32(xmm1, 1), _mm_extract_epi32(xmm1, 0), _mm_extract_epi32(xmm2, 3), _mm_extract_epi32(xmm2, 2), _mm_extract_epi32(xmm2, 1), _mm_extract_epi32(xmm2, 0))
 #endif
 
@@ -242,7 +243,7 @@ static inline __m256 gradient_noise_3d_avx(__m256 fx, float fy, float fz, __m256
 
   random_low = _mm_mullo_epi32(random_low, _mm_mullo_epi32(random_low, _mm_mullo_epi32(random_low, _mm_set1_epi32(60493))));
   random_high = _mm_mullo_epi32(random_high, _mm_mullo_epi32(random_high, _mm_mullo_epi32(random_high, _mm_set1_epi32(60493))));
-  __m256 xv_gradient = fx;  //_mm256_cvtepi32_ps(_mm256_set_epi32(_mm_extract_epi32(random_high, 3), _mm_extract_epi32(random_high, 2), _mm_extract_epi32(random_high, 1), _mm_extract_epi32(random_high, 0), _mm_extract_epi32(random_low, 3), _mm_extract_epi32(random_low, 2), _mm_extract_epi32(random_low, 1), _mm_extract_epi32(random_low, 0)));
+  __m256 xv_gradient = _mm256_cvtepi32_ps(_mm256_set_m128i(random_high, random_low));
   xv_gradient = _mm256_div_ps(xv_gradient, _mm256_set1_ps(2147483648.0));
   float yv_gradient = (random_y * random_y * random_y * 60493) / 2147483648.0;
   float zv_gradient = (random_z * random_z * random_z * 60493) / 2147483648.0;
@@ -261,8 +262,7 @@ static inline __m256 gradient_coherent_noise_3d_avx(__m256 x, float y, float z, 
   __m128i x1_high = _mm256_extractf128_si256(x0, 1);
   x1_high = _mm_add_epi32(x1_high, _mm_set1_epi32(1));
 
-  //__m256i x1 = _mm256_set_epi32(_mm_extract_epi32(x1_high, 3), _mm_extract_epi32(x1_high, 2), _mm_extract_epi32(x1_high, 1), _mm_extract_epi32(x1_high, 0), _mm_extract_epi32(x1_low, 3), _mm_extract_epi32(x1_low, 2), _mm_extract_epi32(x1_low, 1), _mm_extract_epi32(x1_low, 0));
-  __m256i x1 = x0;
+  __m256i x1 = _mm256_set_m128i(x1_high, x1_low);
   int y0 = (y > 0.0 ? (int)y : (int)y - 1);
   int y1 = y0 + 1;
   int z0 = (z > 0.0 ? (int)z : (int)z - 1);
