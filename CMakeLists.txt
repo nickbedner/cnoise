@@ -20,7 +20,13 @@ if (WIN32)
 # Add OpenMP
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /arch:AVX /arch:AVX2")
 else()
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mavx -mavx2")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mavx -mavx2"
+        if (APPLE)
+                set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp -I/usr/local/opt/libomp/include" CACHE INTERNAL "OpenMP flags for Xcode toolchain.")
+                set(OpenMP_C_LIB_NAMES "omp" CACHE INTERNAL "OpenMP lib name for Xcode toolchain.")
+                set(OpenMP_omp_LIBRARY "/usr/local/opt/libomp/lib/libomp.dylib" CACHE INTERNAL "OpenMP lib name for Xcode toolchain.")
+        endif()
+
         find_package(OpenMP REQUIRED)
         #if (OPENMP_FOUND)
                 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
