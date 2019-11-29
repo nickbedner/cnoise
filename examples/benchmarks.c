@@ -6,7 +6,7 @@
 static inline float run_benchmark(float* (*perlin_func)(struct PerlinNoise*, size_t, size_t, size_t), struct PerlinNoise* perlin_noise, size_t size_x, size_t size_y, size_t size_z, bool parallel);
 
 int main(int argc, char* argv[]) {
-  const int size_x = 256, size_y = 256, size_z = 256;
+  const int size_x = 8, size_y = 1, size_z = 1;
 
   struct PerlinNoise perlin_noise;
   perlin_noise_init(&perlin_noise);

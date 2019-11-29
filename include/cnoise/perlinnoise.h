@@ -102,24 +102,24 @@ static inline float *perlin_noise_eval_3d_avx(struct PerlinNoise *perlin_noise, 
         __m256 x_vec = _mm256_add_ps(_mm256_set1_ps(perlin_noise->position[0]), _mm256_mul_ps(_mm256_set_ps(x_dim + 7.0, x_dim + 6.0, x_dim + 5.0, x_dim + 4.0, x_dim + 3.0, x_dim + 2.0, x_dim + 1.0, x_dim), _mm256_set1_ps(perlin_noise->step * perlin_noise->frequency)));
         float y = perlin_noise->position[1] + (y_dim * perlin_noise->step * perlin_noise->frequency);
         float z = perlin_noise->position[2] + (z_dim * perlin_noise->step * perlin_noise->frequency);
-        //
-        //for (int cur_octave = 0; cur_octave < perlin_noise->octave_count; cur_octave++) {
-        //  __m256 nx = make_int_32_range_avx(x_vec);
-        //  float ny = make_int_32_range(y);
-        //  float nz = make_int_32_range(z);
-        //
-        //  printf("Check 4\n");
-        //
-        //  int cur_seed = (perlin_noise->seed + cur_octave) & 0xffffffff;
-        //  __m256 signal = gradient_coherent_noise_3d_avx(nx, ny, nz, cur_seed, perlin_noise->noise_quality);
-        //  value = _mm256_add_ps(value, _mm256_mul_ps(signal, _mm256_set1_ps(cur_persistence)));
-        //
-        //  x_vec = _mm256_mul_ps(x_vec, _mm256_set1_ps(perlin_noise->lacunarity));
-        //  y *= perlin_noise->lacunarity;
-        //  z *= perlin_noise->lacunarity;
-        //
-        //  cur_persistence = cur_persistence * perlin_noise->persistence;
-        //}
+
+        for (int cur_octave = 0; cur_octave < perlin_noise->octave_count; cur_octave++) {
+          __m256 nx = make_int_32_range_avx(x_vec);
+          float ny = make_int_32_range(y);
+          float nz = make_int_32_range(z);
+
+          printf("Check 4\n");
+          //
+          //  int cur_seed = (perlin_noise->seed + cur_octave) & 0xffffffff;
+          //  __m256 signal = gradient_coherent_noise_3d_avx(nx, ny, nz, cur_seed, perlin_noise->noise_quality);
+          //  value = _mm256_add_ps(value, _mm256_mul_ps(signal, _mm256_set1_ps(cur_persistence)));
+          //
+          //  x_vec = _mm256_mul_ps(x_vec, _mm256_set1_ps(perlin_noise->lacunarity));
+          //  y *= perlin_noise->lacunarity;
+          //  z *= perlin_noise->lacunarity;
+          //
+          //  cur_persistence = cur_persistence * perlin_noise->persistence;
+        }
         //
         //_mm256_store_ps(noise_set + (x_dim + (y_dim * x_size) + (z_dim * (x_size * y_size))), value);
       }
