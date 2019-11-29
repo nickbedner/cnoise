@@ -49,6 +49,7 @@ uint64_t xgetbv(unsigned int index) {
 #endif
 #endif
 
+// TODO: Finish this because OSX seems to be missing certain AVX intrinsics
 //#ifdef __APPLE__
 //#undef _mm_extract_epi32
 //#define _mm_extract_epi32(v, n) *(((int32_t *)&v) + n)
@@ -129,6 +130,7 @@ static inline int detect_simd_support() {
   if (os_xr_store)
     xcr_feature_mask = xgetbv(_XCR_XFEATURE_ENABLED_MASK);
 
+// TODO: Remove this when fixed
 #if defined(__APPLE__) && (defined(_mm_extract_epi32) || defined(_mm256_set_m128i))
   avx_supported = false;
 #endif
@@ -174,6 +176,7 @@ static inline bool check_simd_support(int instruction_type) {
   if (os_xr_store)
     xcr_feature_mask = xgetbv(_XCR_XFEATURE_ENABLED_MASK);
 
+// TODO: Remove this when fixed
 #if defined(__APPLE__) && (defined(_mm_extract_epi32) || defined(_mm256_set_m128i))
   avx_supported = false;
 #endif

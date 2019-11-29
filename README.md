@@ -26,11 +26,6 @@ int main(int argc, char* argv[]) {
 
 ```
 
-## Platforms tested
-
-* Clang: Windows, Linux, ARM Linux, MacOSX
-* GCC: Linux, ARM Linux
-
 ### Implemented
 
 * AVX
