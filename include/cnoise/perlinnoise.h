@@ -99,9 +99,9 @@ static inline float *perlin_noise_eval_3d_avx(struct PerlinNoise *perlin_noise, 
         float cur_persistence = 1.0;
 
         printf("Check 3\n");
-        //__m256 x_vec = _mm256_add_ps(_mm256_set1_ps(perlin_noise->position[0]), _mm256_mul_ps(_mm256_set_ps(x_dim + 7.0, x_dim + 6.0, x_dim + 5.0, x_dim + 4.0, x_dim + 3.0, x_dim + 2.0, x_dim + 1.0, x_dim), _mm256_set1_ps(perlin_noise->step * perlin_noise->frequency)));
-        //float y = perlin_noise->position[1] + (y_dim * perlin_noise->step * perlin_noise->frequency);
-        //float z = perlin_noise->position[2] + (z_dim * perlin_noise->step * perlin_noise->frequency);
+        __m256 x_vec = _mm256_add_ps(_mm256_set1_ps(perlin_noise->position[0]), _mm256_mul_ps(_mm256_set_ps(x_dim + 7.0, x_dim + 6.0, x_dim + 5.0, x_dim + 4.0, x_dim + 3.0, x_dim + 2.0, x_dim + 1.0, x_dim), _mm256_set1_ps(perlin_noise->step * perlin_noise->frequency)));
+        float y = perlin_noise->position[1] + (y_dim * perlin_noise->step * perlin_noise->frequency);
+        float z = perlin_noise->position[2] + (z_dim * perlin_noise->step * perlin_noise->frequency);
         //
         //for (int cur_octave = 0; cur_octave < perlin_noise->octave_count; cur_octave++) {
         //  __m256 nx = make_int_32_range_avx(x_vec);
