@@ -127,7 +127,9 @@ static inline int detect_simd_support() {
   if (os_xr_store)
     xcr_feature_mask = xgetbv(_XCR_XFEATURE_ENABLED_MASK);
 
-  avx_supported = false;
+  //#if defined(__APPLE__) && !defined(_mm256_set_m128i)
+  //  avx_supported = false;
+  //#endif
 
   cpuid(cpu_info, 7);
 
@@ -170,7 +172,9 @@ static inline bool check_simd_support(int instruction_type) {
   if (os_xr_store)
     xcr_feature_mask = xgetbv(_XCR_XFEATURE_ENABLED_MASK);
 
-  avx_supported = false;
+  //#if defined(__APPLE__) && !defined(_mm256_set_m128i)
+  //  avx_supported = false;
+  //#endif
 
   cpuid(cpu_info, 7);
 
@@ -262,7 +266,7 @@ static inline __m256 gradient_coherent_noise_3d_avx(__m256 x, float y, float z, 
   __m256i x0 = _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_blendv_ps(_mm256_sub_ps(x, _mm256_set1_ps(1.0)), x, _mm256_cmp_ps(x, _mm256_setzero_ps(), _CMP_GT_OQ))));
   __m128i x1_low = _mm256_extractf128_si256(x0, 0);
   __m128i x1_high = _mm256_extractf128_si256(x0, 1);
-  __m256i x1 = _mm256_set_m128i(_mm_add_epi32(x1_high, _mm_set1_epi32(1)), _mm_add_epi32(x1_low, _mm_set1_epi32(1)));
+  //__m256i x1 = _mm256_set_m128i(_mm_add_epi32(x1_high, _mm_set1_epi32(1)), _mm_add_epi32(x1_low, _mm_set1_epi32(1)));
   int y0 = (y > 0.0 ? (int)y : (int)y - 1);
   int y1 = y0 + 1;
   int z0 = (z > 0.0 ? (int)z : (int)z - 1);
@@ -289,19 +293,19 @@ static inline __m256 gradient_coherent_noise_3d_avx(__m256 x, float y, float z, 
       zs = s_curve5(z - (float)z0);
       break;
   }
-  __m256 n0 = gradient_noise_3d_avx(x, y, z, x0, y0, z0, seed);
-  __m256 n1 = gradient_noise_3d_avx(x, y, z, x1, y0, z0, seed);
-  __m256 ix0 = linear_interp_avx(n0, n1, xs);
-  n0 = gradient_noise_3d_avx(x, y, z, x0, y1, z0, seed);
-  n1 = gradient_noise_3d_avx(x, y, z, x1, y1, z0, seed);
-  __m256 ix1 = linear_interp_avx(n0, n1, xs);
+  //__m256 n0 = gradient_noise_3d_avx(x, y, z, x0, y0, z0, seed);
+  //__m256 n1 = gradient_noise_3d_avx(x, y, z, x1, y0, z0, seed);
+  __m256 ix0 = linear_interp_avx(xs, xs, xs);
+  //n0 = gradient_noise_3d_avx(x, y, z, x0, y1, z0, seed);
+  //n1 = gradient_noise_3d_avx(x, y, z, x1, y1, z0, seed);
+  __m256 ix1 = linear_interp_avx(xs, xs, xs);
   __m256 iy0 = linear_interp_avx(ix0, ix1, _mm256_set1_ps(ys));
-  n0 = gradient_noise_3d_avx(x, y, z, x0, y0, z1, seed);
-  n1 = gradient_noise_3d_avx(x, y, z, x1, y0, z1, seed);
-  ix0 = linear_interp_avx(n0, n1, xs);
-  n0 = gradient_noise_3d_avx(x, y, z, x0, y1, z1, seed);
-  n1 = gradient_noise_3d_avx(x, y, z, x1, y1, z1, seed);
-  ix1 = linear_interp_avx(n0, n1, xs);
+  //n0 = gradient_noise_3d_avx(x, y, z, x0, y0, z1, seed);
+  //n1 = gradient_noise_3d_avx(x, y, z, x1, y0, z1, seed);
+  ix0 = linear_interp_avx(xs, xs, xs);
+  //n0 = gradient_noise_3d_avx(x, y, z, x0, y1, z1, seed);
+  //n1 = gradient_noise_3d_avx(x, y, z, x1, y1, z1, seed);
+  ix1 = linear_interp_avx(xs, xs, xs);
   __m256 iy1 = linear_interp_avx(ix0, ix1, _mm256_set1_ps(ys));
   return linear_interp_avx(iy0, iy1, _mm256_set1_ps(zs));
 }
