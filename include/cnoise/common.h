@@ -230,8 +230,8 @@ static inline __m256 linear_interp_avx(__m256 n0, __m256 n1, __m256 a) {
 }
 
 static inline __m256 gradient_noise_3d_avx(__m256 fx, float fy, float fz, __m256i ix, int iy, int iz, int seed) {
-  __m128i random_low = _mm_xor_si128(_mm_castps_si128(_mm256_extractf128_ps(fx, 0)), _mm_srli_epi32(_mm_castps_si128(_mm256_extractf128_ps(fx, 0)), 16));
-  __m128i random_high = _mm_xor_si128(_mm_castps_si128(_mm256_extractf128_ps(fx, 1)), _mm_srli_epi32(_mm_castps_si128(_mm256_extractf128_ps(fx, 1)), 16));
+  //__m128i random_low = _mm_xor_si128(_mm_castps_si128(_mm256_extractf128_ps(fx, 0)), _mm_srli_epi32(_mm_castps_si128(_mm256_extractf128_ps(fx, 0)), 16));
+  //__m128i random_high = _mm_xor_si128(_mm_castps_si128(_mm256_extractf128_ps(fx, 1)), _mm_srli_epi32(_mm_castps_si128(_mm256_extractf128_ps(fx, 1)), 16));
   printf("Check 5\n");
   return fx;
 
