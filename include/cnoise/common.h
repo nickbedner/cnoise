@@ -118,8 +118,6 @@ static inline int detect_simd_support() {
   int cpu_info[4];
   cpuid(cpu_info, 1);
 
-  //bool osUsesXSAVE_XRSTORE = cpuInfo[2] & (1 << 27) || false;
-
   bool sse2_supported = cpu_info[3] & (1 << 26) || false;
   bool sse4_1_supported = cpu_info[2] & (1 << 19) || false;
   bool avx_supported = cpu_info[2] & (1 << 28) || false;
