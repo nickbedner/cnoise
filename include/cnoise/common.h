@@ -257,7 +257,7 @@ static inline __m256 gradient_coherent_noise_3d_avx(__m256 x, float y, float z, 
   __m256i x0 = _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_blendv_ps(_mm256_sub_ps(x, _mm256_set1_ps(1.0)), x, _mm256_cmp_ps(x, _mm256_setzero_ps(), _CMP_GT_OQ))));
   __m128i x1_low = _mm256_extractf128_si256(x0, 0);
   __m128i x1_high = _mm256_extractf128_si256(x0, 1);
-  __m256i x1 = _mm256_permute2f128_si256(x0, x0, 2);  //_mm256_set_m128i(_mm_add_epi32(x1_high, _mm_set1_epi32(1)), _mm_add_epi32(x1_low, _mm_set1_epi32(1)));
+  __m256i x1 = _mm256_insertf128_si256(x0, x1_high, 2);  //_mm256_set_m128i(_mm_add_epi32(x1_high, _mm_set1_epi32(1)), _mm_add_epi32(x1_low, _mm_set1_epi32(1)));
   int y0 = (y > 0.0 ? (int)y : (int)y - 1);
   int y1 = y0 + 1;
   int z0 = (z > 0.0 ? (int)z : (int)z - 1);
