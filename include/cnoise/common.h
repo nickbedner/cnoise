@@ -49,10 +49,12 @@ uint64_t xgetbv(unsigned int index) {
 #endif
 #endif
 
-#undef _mm_extract_epi32
-#define _mm_extract_epi32(v, n) *(((int32_t *)&v) + n)
-#undef _mm256_set_m128i
-#define _mm256_set_m128i(xmm1, xmm2) _mm256_set_epi32(_mm_extract_epi32(xmm1, 3), _mm_extract_epi32(xmm1, 2), _mm_extract_epi32(xmm1, 1), _mm_extract_epi32(xmm1, 0), _mm_extract_epi32(xmm2, 3), _mm_extract_epi32(xmm2, 2), _mm_extract_epi32(xmm2, 1), _mm_extract_epi32(xmm2, 0))
+//#ifdef __APPLE__
+//#undef _mm_extract_epi32
+//#define _mm_extract_epi32(v, n) *(((int32_t *)&v) + n)
+//#undef _mm256_set_m128i
+//#define _mm256_set_m128i(xmm1, xmm2) _mm256_set_epi32(_mm_extract_epi32(xmm1, 3), _mm_extract_epi32(xmm1, 2), _mm_extract_epi32(xmm1, 1), _mm_extract_epi32(xmm1, 0), _mm_extract_epi32(xmm2, 3), _mm_extract_epi32(xmm2, 2), _mm_extract_epi32(xmm2, 1), _mm_extract_epi32(xmm2, 0))
+//#endif
 
 enum NoiseQuality {
   QUALITY_FAST,
@@ -127,6 +129,13 @@ static inline int detect_simd_support() {
   if (os_xr_store)
     xcr_feature_mask = xgetbv(_XCR_XFEATURE_ENABLED_MASK);
 
+#if defined(__APPLE__) && (!defined(_mm_extract_epi32) || !defined(_mm256_set_m128i))
+  avx_supported = false;
+#endif
+  //#undef _mm_extract_epi32
+  //#define _mm_extract_epi32(v, n) *(((int32_t *)&v) + n)
+  //#undef _mm256_set_m128i
+
   cpuid(cpu_info, 7);
 
   bool avx2_supported = cpu_info[1] & (1 << 5) || false;
@@ -167,6 +176,10 @@ static inline bool check_simd_support(int instruction_type) {
   uint64_t xcr_feature_mask = 0;
   if (os_xr_store)
     xcr_feature_mask = xgetbv(_XCR_XFEATURE_ENABLED_MASK);
+
+#if defined(__APPLE__) && (!defined(_mm_extract_epi32) || !defined(_mm256_set_m128i))
+  avx_supported = false;
+#endif
 
   cpuid(cpu_info, 7);
 
