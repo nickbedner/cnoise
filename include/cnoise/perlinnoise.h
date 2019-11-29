@@ -114,16 +114,16 @@ static inline float *perlin_noise_eval_3d_avx(struct PerlinNoise *perlin_noise, 
           __m256 signal = gradient_coherent_noise_3d_avx(nx, ny, nz, cur_seed, perlin_noise->noise_quality);
           value = _mm256_add_ps(value, _mm256_mul_ps(signal, _mm256_set1_ps(cur_persistence)));
 
-          printf("Check 5\n");
-          //
-          //  x_vec = _mm256_mul_ps(x_vec, _mm256_set1_ps(perlin_noise->lacunarity));
-          //  y *= perlin_noise->lacunarity;
-          //  z *= perlin_noise->lacunarity;
-          //
-          //  cur_persistence = cur_persistence * perlin_noise->persistence;
+          printf("Check Good\n");
+
+          x_vec = _mm256_mul_ps(x_vec, _mm256_set1_ps(perlin_noise->lacunarity));
+          y *= perlin_noise->lacunarity;
+          z *= perlin_noise->lacunarity;
+
+          cur_persistence = cur_persistence * perlin_noise->persistence;
         }
-        //
-        //_mm256_store_ps(noise_set + (x_dim + (y_dim * x_size) + (z_dim * (x_size * y_size))), value);
+
+        _mm256_store_ps(noise_set + (x_dim + (y_dim * x_size) + (z_dim * (x_size * y_size))), value);
       }
     }
   }

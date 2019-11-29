@@ -232,25 +232,28 @@ static inline __m256 linear_interp_avx(__m256 n0, __m256 n1, __m256 a) {
 static inline __m256 gradient_noise_3d_avx(__m256 fx, float fy, float fz, __m256i ix, int iy, int iz, int seed) {
   __m128i random_low = _mm_xor_si128(_mm_castps_si128(_mm256_extractf128_ps(fx, 0)), _mm_srli_epi32(_mm_castps_si128(_mm256_extractf128_ps(fx, 0)), 16));
   __m128i random_high = _mm_xor_si128(_mm_castps_si128(_mm256_extractf128_ps(fx, 1)), _mm_srli_epi32(_mm_castps_si128(_mm256_extractf128_ps(fx, 1)), 16));
-  int random_y = (*(int *)&fy) ^ (*(int *)&fy >> 16);
-  int random_z = (*(int *)&fz) ^ (*(int *)&fz >> 16);
+  printf("Check 5\n");
+  return fx;
 
-  random_low = _mm_xor_si128(_mm_set1_epi32(seed), _mm_mullo_epi32(_mm_set1_epi32(X_NOISE_GEN), random_low));
-  random_high = _mm_xor_si128(_mm_set1_epi32(seed), _mm_mullo_epi32(_mm_set1_epi32(X_NOISE_GEN), random_high));
-  random_y = seed ^ (Y_NOISE_GEN * random_y);
-  random_z = seed ^ (Z_NOISE_GEN * random_z);
-
-  random_low = _mm_mullo_epi32(random_low, _mm_mullo_epi32(random_low, _mm_mullo_epi32(random_low, _mm_set1_epi32(60493))));
-  random_high = _mm_mullo_epi32(random_high, _mm_mullo_epi32(random_high, _mm_mullo_epi32(random_high, _mm_set1_epi32(60493))));
-  __m256 xv_gradient = _mm256_div_ps(_mm256_cvtepi32_ps(_mm256_set_m128i(random_high, random_low)), _mm256_set1_ps(2147483648.0));
-  float yv_gradient = (random_y * random_y * random_y * 60493) / 2147483648.0;
-  float zv_gradient = (random_z * random_z * random_z * 60493) / 2147483648.0;
-
-  __m256 xv_point = _mm256_sub_ps(fx, _mm256_cvtepi32_ps(ix));
-  float yv_point = (fy - (float)iy);
-  float zv_point = (fz - (float)iz);
-
-  return _mm256_mul_ps(_mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(xv_gradient, xv_point), _mm256_mul_ps(_mm256_set1_ps(yv_gradient), _mm256_set1_ps(yv_point))), _mm256_mul_ps(_mm256_set1_ps(zv_gradient), _mm256_set1_ps(zv_point))), _mm256_set1_ps(2.12));
+  //int random_y = (*(int *)&fy) ^ (*(int *)&fy >> 16);
+  //int random_z = (*(int *)&fz) ^ (*(int *)&fz >> 16);
+  //
+  //random_low = _mm_xor_si128(_mm_set1_epi32(seed), _mm_mullo_epi32(_mm_set1_epi32(X_NOISE_GEN), random_low));
+  //random_high = _mm_xor_si128(_mm_set1_epi32(seed), _mm_mullo_epi32(_mm_set1_epi32(X_NOISE_GEN), random_high));
+  //random_y = seed ^ (Y_NOISE_GEN * random_y);
+  //random_z = seed ^ (Z_NOISE_GEN * random_z);
+  //
+  //random_low = _mm_mullo_epi32(random_low, _mm_mullo_epi32(random_low, _mm_mullo_epi32(random_low, _mm_set1_epi32(60493))));
+  //random_high = _mm_mullo_epi32(random_high, _mm_mullo_epi32(random_high, _mm_mullo_epi32(random_high, _mm_set1_epi32(60493))));
+  //__m256 xv_gradient = _mm256_div_ps(_mm256_cvtepi32_ps(_mm256_set_m128i(random_high, random_low)), _mm256_set1_ps(2147483648.0));
+  //float yv_gradient = (random_y * random_y * random_y * 60493) / 2147483648.0;
+  //float zv_gradient = (random_z * random_z * random_z * 60493) / 2147483648.0;
+  //
+  //__m256 xv_point = _mm256_sub_ps(fx, _mm256_cvtepi32_ps(ix));
+  //float yv_point = (fy - (float)iy);
+  //float zv_point = (fz - (float)iz);
+  //
+  //return _mm256_mul_ps(_mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(xv_gradient, xv_point), _mm256_mul_ps(_mm256_set1_ps(yv_gradient), _mm256_set1_ps(yv_point))), _mm256_mul_ps(_mm256_set1_ps(zv_gradient), _mm256_set1_ps(zv_point))), _mm256_set1_ps(2.12));
 }
 
 static inline __m256 gradient_coherent_noise_3d_avx(__m256 x, float y, float z, int seed, enum NoiseQuality noise_quality) {
