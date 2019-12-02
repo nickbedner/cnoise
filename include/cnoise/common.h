@@ -142,7 +142,7 @@ static inline int detect_simd_support() {
 
   if (avx512f_supported && ((xcr_feature_mask & 0xe6) == 0xe6))
     return SIMD_AVX512F;
-  else if (avx2_supported)
+  else if (avx2_supported && ((xcr_feature_mask & 0x6) == 0x6))
     return SIMD_AVX2;
   else if (avx_supported && ((xcr_feature_mask & 0x6) == 0x6))
     return SIMD_AVX;
@@ -188,7 +188,7 @@ static inline bool check_simd_support(int instruction_type) {
 
   if (avx512f_supported && ((xcr_feature_mask & 0xe6) == 0xe6) && instruction_type == SIMD_AVX512F)
     return true;
-  else if (avx2_supported && instruction_type == SIMD_AVX2)
+  else if (avx2_supported && ((xcr_feature_mask & 0x6) == 0x6) && instruction_type == SIMD_AVX2)
     return true;
   else if (avx_supported && ((xcr_feature_mask & 0x6) == 0x6) && instruction_type == SIMD_AVX)
     return true;
@@ -274,7 +274,7 @@ static inline __m256 gradient_coherent_noise_3d_avx(__m256 x, float y, float z, 
   x1_low = _mm_add_epi32(x1_low, _mm_set1_epi32(1));
   __m128i x1_high = _mm256_extractf128_si256(x0, 1);
   x1_high = _mm_add_epi32(x1_high, _mm_set1_epi32(1));
-
+  // TODO: Figure out what instruction causes problem here on osx
   __m256i x1 = _mm256_set_m128i(x1_high, x1_low);
   int y0 = (y > 0.0 ? (int)y : (int)y - 1);
   int y1 = y0 + 1;
