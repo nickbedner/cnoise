@@ -25,8 +25,8 @@ int main(int argc, char* argv[]) {
   __m128i x1_high = _mm256_extractf128_si256(x0, 1);
   x1_high = _mm_add_epi32(x1_high, _mm_set1_epi32(1));
   // TODO: Figure out what instruction causes problem here on osx
-  __m256i x1 = _mm256_set_m128i(x1_high, x1_low);
-  printf("Test: %d", x1);
+  //__m256i x1 = _mm256_set_m128i(x1_high, x1_low);
+  printf("Test: %d %d", x1_low, x1_high);
 
 //  if (check_simd_support(SIMD_AVX2)) {
 //    printf("AVX2 parallel time: %f\n", run_benchmark(&perlin_noise_eval_3d_avx2, &perlin_noise, size_x, size_y, size_z, true));
