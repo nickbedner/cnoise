@@ -56,12 +56,15 @@ static inline void perlin_noise_init(struct PerlinNoise *perlin_noise) {
       break;
     case SIMD_AVX2:
       perlin_noise->perlin_func = &perlin_noise_eval_3d_avx2;
+      printf("Using avx2");
       break;
     case SIMD_AVX:
       perlin_noise->perlin_func = &perlin_noise_eval_3d_avx;
+      printf("Using avx");
       break;
     case SIMD_SSE4_1:
       perlin_noise->perlin_func = &perlin_noise_eval_3d_sse4_1;
+      printf("Using sse4.1");
       break;
     case SIMD_SSE2:
       perlin_noise->perlin_func = &perlin_noise_eval_3d_fallback;
@@ -73,6 +76,7 @@ static inline void perlin_noise_init(struct PerlinNoise *perlin_noise) {
 #endif
     default:
       perlin_noise->perlin_func = &perlin_noise_eval_3d_fallback;
+      printf("Using fallback");
       break;
   }
 }
