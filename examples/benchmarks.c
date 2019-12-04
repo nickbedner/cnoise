@@ -26,9 +26,9 @@ int main(int argc, char* argv[]) {
 #ifdef ARCH_32_64
   // The following are tests to find Apple's missing intrinsics
   // All intrinsics on this line are good
-  __m256i x0 = _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_blendv_ps(_mm256_sub_ps(_mm256_set1_ps(1.0), _mm256_set1_ps(1.0)), _mm256_set1_ps(1.0), _mm256_cmp_ps(_mm256_set1_ps(1.0), _mm256_setzero_ps(), _CMP_GT_OQ))));
+  //__m256i x0 = _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_blendv_ps(_mm256_sub_ps(_mm256_set1_ps(1.0), _mm256_set1_ps(1.0)), _mm256_set1_ps(1.0), _mm256_cmp_ps(_mm256_set1_ps(1.0), _mm256_setzero_ps(), _CMP_GT_OQ))));
   // Fine
-  //__m256i x0 = _mm256_set1_epi32(1);
+  __m256i x0 = _mm256_set1_epi32(1);
   // Fine
   __m128i x1_low = _mm_set_epi64x(_mm256_extract_epi64(x0, 1), _mm256_extract_epi64(x0, 0));
   //_mm256_extractf128_si256(x0, 0);
