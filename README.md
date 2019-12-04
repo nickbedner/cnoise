@@ -35,6 +35,7 @@ int main(int argc, char* argv[]) {
 * Perlin Noise
 * Ridged Fractal Noise
 * Runtime instruction select
+* SSE4.1
 * Voronoi Noise
 
 ### In Progress
@@ -43,7 +44,6 @@ int main(int argc, char* argv[]) {
 * AVX-512F
 * Doc
 * SSE2
-* SSE4.1
 * White Noise
 
 ### Planned

@@ -13,7 +13,7 @@ static inline float run_benchmark(float* (*perlin_func)(struct PerlinNoise*, siz
 //#define _mm256_set_m128i(xmm1, xmm2) _mm256_set_epi32(_mm_extract_epi32(xmm1, 3), _mm_extract_epi32(xmm1, 2), _mm_extract_epi32(xmm1, 1), _mm_extract_epi32(xmm1, 0), _mm_extract_epi32(xmm2, 3), _mm_extract_epi32(xmm2, 2), _mm_extract_epi32(xmm2, 1), _mm_extract_epi32(xmm2, 0))
 
 int main(int argc, char* argv[]) {
-  const int size_x = 8, size_y = 1, size_z = 1;
+  const int size_x = 128, size_y = 128, size_z = 128;
 
   struct PerlinNoise perlin_noise;
   perlin_noise_init(&perlin_noise);
