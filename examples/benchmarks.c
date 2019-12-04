@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
   //__m128i x1_high = _mm256_extractf128_si256(x0, 1);
   //x1_high = _mm_add_epi32(x1_high, _mm_set1_epi32(1));
   // TODO: Figure out what instruction causes problem here on osx
-  __m256i x1 = _mm256_set_epi64x(_mm_extract_epi64(x1_low, 1), _mm_extract_epi64(x1_low, 0), _mm_extract_epi64(x1_low, 1), _mm_extract_epi64(x1_low, 0));
+  __m256i x1 = _mm256_set_epi32(_mm_extract_epi32(x1_low, 3), _mm_extract_epi32(x1_low, 2), _mm_extract_epi32(x1_low, 1), _mm_extract_epi32(x1_low, 0), _mm_extract_epi32(x1_low, 3), _mm_extract_epi32(x1_low, 2), _mm_extract_epi32(x1_low, 1), _mm_extract_epi32(x1_low, 0));
   printf("Test: %d", x1);
   //printf("Test: %d", x1_low);
   //printf("Test: %d %d", x1_low, x1_high);
