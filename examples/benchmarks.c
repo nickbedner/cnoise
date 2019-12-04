@@ -5,8 +5,8 @@
 
 static inline float run_benchmark(float* (*perlin_func)(struct PerlinNoise*, size_t, size_t, size_t), struct PerlinNoise* perlin_noise, size_t size_x, size_t size_y, size_t size_z, bool parallel);
 
-//#undef _mm_extract_epi32
-//#define _mm_extract_epi32(v, n) *(((int32_t*)&v) + n)
+#undef _mm_extract_epi32
+#define _mm_extract_epi32(v, n) *(((int32_t*)&v) + n)
 //#undef _mm256_set_m128i
 //#define _mm256_set_m128i(xmm1, xmm2) _mm256_set_epi32(_mm_extract_epi32(xmm1, 3), _mm_extract_epi32(xmm1, 2), _mm_extract_epi32(xmm1, 1), _mm_extract_epi32(xmm1, 0), _mm_extract_epi32(xmm2, 3), _mm_extract_epi32(xmm2, 2), _mm_extract_epi32(xmm2, 1), _mm_extract_epi32(xmm2, 0))
 
