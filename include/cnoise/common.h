@@ -132,7 +132,7 @@ static inline int detect_simd_support() {
   bool avx512f_supported = cpu_info[1] & (1 << 16) || false;
 
 // Older OSX cpus supporting only avx seem to have broken support with modern intrinsics
-#if defined(__APPLE__))
+#ifdef __APPLE__
   if (avx_supported && avx2_supported == false)
     avx_supported = false;
 #endif
@@ -174,7 +174,7 @@ static inline bool check_simd_support(int instruction_type) {
     xcr_feature_mask = xgetbv(_XCR_XFEATURE_ENABLED_MASK);
 
 // Older OSX cpus supporting only avx seem to have broken support with modern intrinsics
-#if defined(__APPLE__))
+#ifdef __APPLE__
   if (avx_supported && avx2_supported == false)
     avx_supported = false;
 #endif
