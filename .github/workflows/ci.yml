@@ -6,6 +6,8 @@ jobs:
     runs-on: macOS-latest
     steps:
     - uses: actions/checkout@v1
+    - name: Check SIMD
+      run: sysctl -a | grep cpu.feat
     - name: Install dependencies
       run: brew install libomp
     - name: Build all
