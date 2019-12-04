@@ -17,7 +17,15 @@ int main(int argc, char* argv[]) {
   printf("///////////////////////////////////////////////////////////////////\n");
 
 #ifdef ARCH_32_64
-// The following are tests to find Apple's missing intrinsics
+  // The following are tests to find Apple's missing intrinsics
+  __m256i x0 = _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_blendv_ps(_mm256_sub_ps(_mm256_set1_ps(1.0), _mm256_set1_ps(1.0)), _mm256_set1_ps(1.0), _mm256_cmp_ps(_mm256_set1_ps(1.0), _mm256_setzero_ps(), _CMP_GT_OQ))));
+  __m128i x1_low = _mm256_extractf128_si256(x0, 0);
+  x1_low = _mm_add_epi32(x1_low, _mm_set1_epi32(1));
+  __m128i x1_high = _mm256_extractf128_si256(x0, 1);
+  x1_high = _mm_add_epi32(x1_high, _mm_set1_epi32(1));
+  // TODO: Figure out what instruction causes problem here on osx
+  __m256i x1 = _mm256_set_m128i(x1_high, x1_low);
+  printf("Test: %d", x1);
 
 //  if (check_simd_support(SIMD_AVX2)) {
 //    printf("AVX2 parallel time: %f\n", run_benchmark(&perlin_noise_eval_3d_avx2, &perlin_noise, size_x, size_y, size_z, true));
