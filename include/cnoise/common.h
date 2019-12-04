@@ -49,14 +49,6 @@ uint64_t xgetbv(unsigned int index) {
 #endif
 #endif
 
-// TODO: Finish this because OSX seems to be missing certain AVX intrinsics
-//#ifdef __APPLE__
-//#undef _mm_extract_epi32
-//#define _mm_extract_epi32(v, n) *(((int32_t *)&v) + n)
-//#undef _mm256_set_m128i
-//#define _mm256_set_m128i(xmm1, xmm2) _mm256_set_epi32(_mm_extract_epi32(xmm1, 3), _mm_extract_epi32(xmm1, 2), _mm_extract_epi32(xmm1, 1), _mm_extract_epi32(xmm1, 0), _mm_extract_epi32(xmm2, 3), _mm_extract_epi32(xmm2, 2), _mm_extract_epi32(xmm2, 1), _mm_extract_epi32(xmm2, 0))
-//#endif
-
 enum NoiseQuality {
   QUALITY_FAST,
   QUALITY_STANDARD,
@@ -134,15 +126,16 @@ static inline int detect_simd_support() {
   if (os_xr_store)
     xcr_feature_mask = xgetbv(_XCR_XFEATURE_ENABLED_MASK);
 
-// TODO: Remove this when fixed
-#if defined(__APPLE__) && (defined(_mm_extract_epi32) || defined(_mm256_set_m128i))
-  avx_supported = false;
-#endif
-
   cpuid(cpu_info, 7);
 
   bool avx2_supported = cpu_info[1] & (1 << 5) || false;
   bool avx512f_supported = cpu_info[1] & (1 << 16) || false;
+
+// Older OSX cpus supporting only avx seem to have broken support with modern intrinsics
+#if defined(__APPLE__))
+  if (avx_supported && avx2_supported == false)
+    avx_supported = false;
+#endif
 
   if (avx512f_supported && ((xcr_feature_mask & 0xe6) == 0xe6))
     return SIMD_AVX512F;

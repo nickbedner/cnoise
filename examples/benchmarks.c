@@ -24,43 +24,26 @@ int main(int argc, char* argv[]) {
   printf("///////////////////////////////////////////////////////////////////\n");
 
 #ifdef ARCH_32_64
-  // The following are tests to find Apple's missing intrinsics
-  // All intrinsics on this line are good
-  //__m256i x0 = _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_blendv_ps(_mm256_sub_ps(_mm256_set1_ps(1.0), _mm256_set1_ps(1.0)), _mm256_set1_ps(1.0), _mm256_cmp_ps(_mm256_set1_ps(1.0), _mm256_setzero_ps(), _CMP_GT_OQ))));
-  // Fine
-  __m256i x0 = _mm256_set1_epi32(1);
-  // Fine
-  __m128i x1_low = _mm_set_epi64x(_mm256_extract_epi64(x0, 1), _mm256_extract_epi64(x0, 0));
-  //_mm256_extractf128_si256(x0, 0);
-  //x1_low = _mm_add_epi32(x1_low, _mm_set1_epi32(1));
-  //__m128i x1_high = _mm256_extractf128_si256(x0, 1);
-  //x1_high = _mm_add_epi32(x1_high, _mm_set1_epi32(1));
-  // TODO: Figure out what instruction causes problem here on osx
-  __m256i x1 = _mm256_set_epi64x(_mm_extract_epi64(x1_low, 1), _mm_extract_epi64(x1_low, 0), _mm_extract_epi64(x1_low, 1), _mm_extract_epi64(x1_low, 0));
-  printf("Test: %d", x1);
-  //printf("Test: %d", x1_low);
-  //printf("Test: %d %d", x1_low, x1_high);
+  if (check_simd_support(SIMD_AVX2)) {
+    printf("AVX2 parallel time: %f\n", run_benchmark(&perlin_noise_eval_3d_avx2, &perlin_noise, size_x, size_y, size_z, true));
+    printf("AVX2 single thread time: %f\n", run_benchmark(&perlin_noise_eval_3d_avx2, &perlin_noise, size_x, size_y, size_z, false));
+  } else
+    printf("AVX2 support not detected!\n");
+  printf("///////////////////////////////////////////////////////////////////\n");
 
-//  if (check_simd_support(SIMD_AVX2)) {
-//    printf("AVX2 parallel time: %f\n", run_benchmark(&perlin_noise_eval_3d_avx2, &perlin_noise, size_x, size_y, size_z, true));
-//    printf("AVX2 single thread time: %f\n", run_benchmark(&perlin_noise_eval_3d_avx2, &perlin_noise, size_x, size_y, size_z, false));
-//  } else
-//    printf("AVX2 support not detected!\n");
-//  printf("///////////////////////////////////////////////////////////////////\n");
-//
-//  if (check_simd_support(SIMD_AVX)) {
-//    printf("AVX parallel time: %f\n", run_benchmark(&perlin_noise_eval_3d_avx, &perlin_noise, size_x, size_y, size_z, true));
-//    printf("AVX single thread time: %f\n", run_benchmark(&perlin_noise_eval_3d_avx, &perlin_noise, size_x, size_y, size_z, false));
-//  } else
-//    printf("AVX support not detected!\n");
-//  printf("///////////////////////////////////////////////////////////////////\n");
-//
-//  if (check_simd_support(SIMD_SSE4_1)) {
-//    printf("SSE4.1 parallel time: %f\n", run_benchmark(&perlin_noise_eval_3d_avx, &perlin_noise, size_x, size_y, size_z, true));
-//    printf("SSE4.1 single thread time: %f\n", run_benchmark(&perlin_noise_eval_3d_avx, &perlin_noise, size_x, size_y, size_z, false));
-//  } else
-//    printf("SSE4.1 support not detected!\n");
-//  printf("///////////////////////////////////////////////////////////////////\n");
+  if (check_simd_support(SIMD_AVX)) {
+    printf("AVX parallel time: %f\n", run_benchmark(&perlin_noise_eval_3d_avx, &perlin_noise, size_x, size_y, size_z, true));
+    printf("AVX single thread time: %f\n", run_benchmark(&perlin_noise_eval_3d_avx, &perlin_noise, size_x, size_y, size_z, false));
+  } else
+    printf("AVX support not detected!\n");
+  printf("///////////////////////////////////////////////////////////////////\n");
+
+  if (check_simd_support(SIMD_SSE4_1)) {
+    printf("SSE4.1 parallel time: %f\n", run_benchmark(&perlin_noise_eval_3d_avx, &perlin_noise, size_x, size_y, size_z, true));
+    printf("SSE4.1 single thread time: %f\n", run_benchmark(&perlin_noise_eval_3d_avx, &perlin_noise, size_x, size_y, size_z, false));
+  } else
+    printf("SSE4.1 support not detected!\n");
+  printf("///////////////////////////////////////////////////////////////////\n");
 #else
 // ARM Neon
 #endif
