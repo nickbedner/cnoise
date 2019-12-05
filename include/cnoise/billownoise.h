@@ -9,6 +9,11 @@
 #define DEFAULT_BILLOW_PERSISTENCE 0.5
 #define DEFAULT_BILLOW_OCTAVE_COUNT 6
 #define DEFAULT_BILLOW_SEED 0
+#define DEFAULT_BILLOW_POSITION_X 0.0
+#define DEFAULT_BILLOW_POSITION_Y 0.0
+#define DEFAULT_BILLOW_POSITION_Z 0.0
+#define DEFAULT_BILLOW_STEP 0.01
+#define DEFAULT_BILLOW_PARALLEL false
 #define DEFAULT_BILLOW_QUALITY QUALITY_STANDARD
 
 struct BillowNoise {
@@ -17,6 +22,10 @@ struct BillowNoise {
   float persistence;
   unsigned char octave_count;
   int seed;
+  float position[3];
+  float step;
+  bool parallel;
+  float *(*billow_func)(struct PerlinNoise *, size_t, size_t, size_t);
   enum NoiseQuality noise_quality;
 };
 
