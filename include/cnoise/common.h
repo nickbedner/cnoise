@@ -59,6 +59,7 @@ enum NoiseQuality {
 #define X_NOISE_GEN 1619
 #define Y_NOISE_GEN 31337
 #define Z_NOISE_GEN 6971
+#define SEED_NOISE_GEN 1013
 
 enum SIMDType {
   SIMD_FALLBACK = 0,
@@ -92,9 +93,13 @@ static inline __m256 linear_interp_avx(__m256 n0, __m256 n1, __m256 a);
 static inline __m256 gradient_noise_3d_avx(__m256 fx, float fy, float fz, __m256i ix, int iy, int iz, int seed);
 static inline __m256 gradient_coherent_noise_3d_avx(__m256 x, float y, float z, int seed, enum NoiseQuality noise_quality);
 // AVX2
+static inline __m256i fast_floor_avx2(__m256 x);
+static inline __m256i int_value_noise_3d_avx2(__m256i x, int y, int z, int seed);
+static inline __m256 value_noise_3d_avx2(__m256i x, int y, int z, int seed);
 static inline __m256 gradient_noise_3d_avx2(__m256 fx, float fy, float fz, __m256i ix, int iy, int iz, int seed);
 static inline __m256 gradient_coherent_noise_3d_avx2(__m256 x, float y, float z, int seed, enum NoiseQuality noise_quality);
 #endif
+// Fallback
 static inline float make_int_32_range(float n);
 static inline float cubic_interp(float n0, float n1, float n2, float n3, float a);
 static inline float s_curve3(float a);
@@ -445,7 +450,6 @@ static inline __m256 gradient_coherent_noise_3d_avx(__m256 x, float y, float z, 
   x1_low = _mm_add_epi32(x1_low, _mm_set1_epi32(1));
   __m128i x1_high = _mm256_extractf128_si256(x0, 1);
   x1_high = _mm_add_epi32(x1_high, _mm_set1_epi32(1));
-  // TODO: Figure out what instruction causes problem here on osx
   __m256i x1 = _mm256_set_m128i(x1_high, x1_low);
   int y0 = (y > 0.0 ? (int)y : (int)y - 1);
   int y1 = y0 + 1;
@@ -486,6 +490,36 @@ static inline __m256 gradient_coherent_noise_3d_avx(__m256 x, float y, float z, 
   ix1 = linear_interp_avx(n0, n1, xs);
   __m256 iy1 = linear_interp_avx(ix0, ix1, _mm256_set1_ps(ys));
   return linear_interp_avx(iy0, iy1, _mm256_set1_ps(zs));
+}
+
+// TODO: Check this
+static inline __m256i fast_floor_avx2(__m256 x) {
+  __m256 xi = _mm256_floor_ps(x);
+  return _mm256_cvtps_epi32(_mm256_blendv_ps(xi, _mm256_sub_ps(xi, _mm256_set1_ps(1.0)), _mm256_cmp_ps(x, xi, _CMP_LT_OQ)));
+}
+
+// TODO: Can maybe do only floats
+static inline __m256i int_value_noise_3d_avx2_full(__m256i x, __m256i y, __m256i z, int seed) {
+  __m256i n = _mm256_and_si256(_mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(X_NOISE_GEN), x), _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(Y_NOISE_GEN), x), _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(Z_NOISE_GEN), x), _mm256_set1_epi32(SEED_NOISE_GEN * seed)))), _mm256_set1_epi32(0x7fffffff));
+  n = _mm256_xor_si256(_mm256_srli_epi32(n, 13), n);
+  return _mm256_and_si256(_mm256_add_epi32(_mm256_mullo_epi32(n, _mm256_add_epi32(_mm256_mullo_epi32(n, _mm256_mullo_epi32(n, _mm256_set1_epi32(60493))), _mm256_set1_epi32(19990303))), _mm256_set1_epi32(1376312589)), _mm256_set1_epi32(0x7fffffff));
+}
+
+// TODO: Can maybe do only floats
+static inline __m256i int_value_noise_3d_avx2(__m256i x, int y, int z, int seed) {
+  __m256i n = _mm256_and_si256(_mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(X_NOISE_GEN), x), _mm256_set1_epi32(Y_NOISE_GEN * y + Z_NOISE_GEN * z + SEED_NOISE_GEN * seed)), _mm256_set1_epi32(0x7fffffff));
+  n = _mm256_xor_si256(_mm256_srli_epi32(n, 13), n);
+  return _mm256_and_si256(_mm256_add_epi32(_mm256_mullo_epi32(n, _mm256_add_epi32(_mm256_mullo_epi32(n, _mm256_mullo_epi32(n, _mm256_set1_epi32(60493))), _mm256_set1_epi32(19990303))), _mm256_set1_epi32(1376312589)), _mm256_set1_epi32(0x7fffffff));
+}
+
+// TODO: Can maybe do only floats
+static inline __m256 value_noise_3d_avx2_full(__m256i x, __m256i y, __m256i z, int seed) {
+  return _mm256_sub_ps(_mm256_set1_ps(1.0), _mm256_div_ps(_mm256_cvtepi32_ps(int_value_noise_3d_avx2_full(x, y, z, seed)), _mm256_set1_ps(1073741824.0)));
+}
+
+// TODO: Can maybe do only floats
+static inline __m256 value_noise_3d_avx2(__m256i x, int y, int z, int seed) {
+  return _mm256_sub_ps(_mm256_set1_ps(1.0), _mm256_div_ps(_mm256_cvtepi32_ps(int_value_noise_3d_avx2(x, y, z, seed)), _mm256_set1_ps(1073741824.0)));
 }
 
 static inline __m256 gradient_noise_3d_avx2(__m256 fx, float fy, float fz, __m256i ix, int iy, int iz, int seed) {
@@ -593,11 +627,8 @@ static inline int fast_floor(float x) {
 }
 
 static inline int int_value_noise_3d(int x, int y, int z, int seed) {
-  // All constants are primes and must remain prime in order for this noise function to work correctly.
-  //int n = (X_NOISE_GEN * x + Y_NOISE_GEN * y + Z_NOISE_GEN * z + SEED_NOISE_GEN * seed) & 0x7fffffff;
-  int n = 1;
+  int n = (X_NOISE_GEN * x + Y_NOISE_GEN * y + Z_NOISE_GEN * z + SEED_NOISE_GEN * seed) & 0x7fffffff;
   n = (n >> 13) ^ n;
-
   return (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff;
 }
 
@@ -626,7 +657,6 @@ static inline float gradient_noise_3d(float fx, float fy, float fz, int ix, int 
 }
 
 static inline float gradient_coherent_noise_3d(float x, float y, float z, int seed, enum NoiseQuality noise_quality) {
-  //int x0 = (x > 0.0 ? lrint(x) : lrint(x) - 1);
   int x0 = (x > 0.0 ? (int)x : (int)x - 1);
   int x1 = x0 + 1;
   int y0 = (y > 0.0 ? (int)y : (int)y - 1);
