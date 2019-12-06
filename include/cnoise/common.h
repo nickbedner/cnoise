@@ -339,7 +339,7 @@ static inline __m128 gradient_noise_3d_sse4_1(__m128 fx, float fy, float fz, __m
 }
 
 static inline __m128 gradient_coherent_noise_3d_sse4_1(__m128 x, float y, float z, int seed, enum NoiseQuality noise_quality) {
-  __m128i x0 = _mm_cvtps_epi32(_mm_floor_ps(_mm_blendv_ps(_mm_sub_ps(x, _mm_set1_ps(1.0)), x, _mm_cmp_ps(x, _mm_setzero_ps(), _CMP_GT_OQ))));
+  __m128i x0 = _mm_cvtps_epi32(_mm_floor_ps(_mm_blendv_ps(_mm_sub_ps(x, _mm_set1_ps(1.0)), x, _mm_cmpgt_ps(x, _mm_setzero_ps()))));
   __m128i x1 = _mm_add_epi32(x0, _mm_set1_epi32(1));
   int y0 = (y > 0.0 ? (int)y : (int)y - 1);
   int y1 = y0 + 1;

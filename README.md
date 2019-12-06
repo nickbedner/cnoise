@@ -48,6 +48,9 @@ int main(int argc, char* argv[]) {
 
 ### Planned
 
+* Checkerboard Noise
+* Cubic Noise
 * Hydraulic Noise
 * GLSL implementations
 * Open Simplex Noise
+* Sphere Noise
