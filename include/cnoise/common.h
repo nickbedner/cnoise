@@ -94,7 +94,9 @@ static inline __m256 gradient_noise_3d_avx(__m256 fx, float fy, float fz, __m256
 static inline __m256 gradient_coherent_noise_3d_avx(__m256 x, float y, float z, int seed, enum NoiseQuality noise_quality);
 // AVX2
 static inline __m256i fast_floor_avx2(__m256 x);
+static inline __m256i int_value_noise_3d_avx2_full(__m256i x, __m256i y, __m256i z, int seed);
 static inline __m256i int_value_noise_3d_avx2(__m256i x, int y, int z, int seed);
+static inline __m256 value_noise_3d_avx2_full(__m256i x, __m256i y, __m256i z, int seed);
 static inline __m256 value_noise_3d_avx2(__m256i x, int y, int z, int seed);
 static inline __m256 gradient_noise_3d_avx2(__m256 fx, float fy, float fz, __m256i ix, int iy, int iz, int seed);
 static inline __m256 gradient_coherent_noise_3d_avx2(__m256 x, float y, float z, int seed, enum NoiseQuality noise_quality);
@@ -110,6 +112,11 @@ static inline int int_value_noise_3d(int x, int y, int z, int seed);
 static inline float value_noise_3d(int x, int y, int z, int seed);
 static inline float gradient_noise_3d(float fx, float fy, float fz, int ix, int iy, int iz, int seed);
 static inline float gradient_coherent_noise_3d(float x, float y, float z, int seed, enum NoiseQuality noise_quality);
+
+//for (int loop_num = 0; loop_num < 8; loop_num++)
+//  printf("N: %d is %d\n", loop_num, *((int32_t *)&n + loop_num));
+//for (int loop_num = 0; loop_num < 8; loop_num++)
+//  printf("N: %d is %d\n", loop_num, n);
 
 static inline void *noise_allocate(size_t alignment, size_t size) {
   void *mem = malloc(size + alignment + sizeof(void *));
@@ -492,15 +499,9 @@ static inline __m256 gradient_coherent_noise_3d_avx(__m256 x, float y, float z, 
   return linear_interp_avx(iy0, iy1, _mm256_set1_ps(zs));
 }
 
-// TODO: Check this
-static inline __m256i fast_floor_avx2(__m256 x) {
-  __m256 xi = _mm256_floor_ps(x);
-  return _mm256_cvtps_epi32(_mm256_blendv_ps(xi, _mm256_sub_ps(xi, _mm256_set1_ps(1.0)), _mm256_cmp_ps(x, xi, _CMP_LT_OQ)));
-}
-
 // TODO: Can maybe do only floats
 static inline __m256i int_value_noise_3d_avx2_full(__m256i x, __m256i y, __m256i z, int seed) {
-  __m256i n = _mm256_and_si256(_mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(X_NOISE_GEN), x), _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(Y_NOISE_GEN), x), _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(Z_NOISE_GEN), x), _mm256_set1_epi32(SEED_NOISE_GEN * seed)))), _mm256_set1_epi32(0x7fffffff));
+  __m256i n = _mm256_and_si256(_mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(X_NOISE_GEN), x), _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(Y_NOISE_GEN), y), _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(Z_NOISE_GEN), z), _mm256_set1_epi32(SEED_NOISE_GEN * seed)))), _mm256_set1_epi32(0x7fffffff));
   n = _mm256_xor_si256(_mm256_srli_epi32(n, 13), n);
   return _mm256_and_si256(_mm256_add_epi32(_mm256_mullo_epi32(n, _mm256_add_epi32(_mm256_mullo_epi32(n, _mm256_mullo_epi32(n, _mm256_set1_epi32(60493))), _mm256_set1_epi32(19990303))), _mm256_set1_epi32(1376312589)), _mm256_set1_epi32(0x7fffffff));
 }
@@ -619,11 +620,6 @@ static inline float s_curve5(float a) {
 
 static inline float linear_interp(float n0, float n1, float a) {
   return ((1.0 - a) * n0) + (a * n1);
-}
-
-static inline int fast_floor(float x) {
-  int xi = (int)x;
-  return x < xi ? xi - 1 : xi;
 }
 
 static inline int int_value_noise_3d(int x, int y, int z, int seed) {
