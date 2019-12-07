@@ -189,8 +189,10 @@ static inline float *ridged_fractal_noise_eval_3d_sse2(struct RidgedFractalNoise
 
           weight = _mm_mul_ps(signal, _mm_set1_ps(gain));
 
-          weight = _mm_or_ps(_mm_and_ps(_mm_set1_ps(1.0), _mm_cmpgt_ps(weight, _mm_set1_ps(1.0))), _mm_andnot_ps(_mm_cmpgt_ps(weight, _mm_set1_ps(1.0)), weight));
-          weight = _mm_or_ps(_mm_and_ps(_mm_set1_ps(1.0), _mm_cmplt_ps(weight, _mm_setzero_ps())), _mm_andnot_ps(_mm_cmplt_ps(weight, _mm_setzero_ps()), weight));
+          __m128 weight_gt_mask = _mm_cmpgt_ps(weight, _mm_set1_ps(1.0));
+          weight = _mm_or_ps(_mm_and_ps(_mm_set1_ps(1.0), weight_gt_mask), _mm_andnot_ps(weight_gt_mask, weight));
+          __m128 weight_lt_mask = _mm_cmplt_ps(weight, _mm_setzero_ps());
+          weight = _mm_or_ps(_mm_and_ps(_mm_set1_ps(1.0), weight_lt_mask), _mm_andnot_ps(weight_lt_mask, weight));
 
           value = _mm_add_ps(value, _mm_mul_ps(signal, _mm_set1_ps(ridged_fractal_noise->spectral_weights[cur_octave])));
 
