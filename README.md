@@ -7,7 +7,7 @@
 
 Header only C noise library with SIMD, multithreading, and more. Will automatically select the best instruction set to use at runtime. Based on libnoise and FastNoise.
 
-## Settings up a Project
+## Setting up a Project
 
 Include the cnoise header and you're good to go. OpenMP is required for multithreading support but can work without it.
 
