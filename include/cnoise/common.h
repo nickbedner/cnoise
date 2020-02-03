@@ -24,14 +24,14 @@
 #define PLATFORM_WIN32
 #include <intrin.h>
 #define cpuid(info, x) __cpuidex(info, x, 0)
-__int64 xgetbv(unsigned int x) {
+static inline __int64 xgetbv(unsigned int x) {
   return _xgetbv(x);
 }
 #else
 #define PLATFORM_OTHER
 #include <cpuid.h>
 #define cpuid(info, x) __cpuid_count(x, 0, info[0], info[1], info[2], info[3])
-uint64_t xgetbv(unsigned int index) {
+static inline uint64_t xgetbv(unsigned int index) {
   uint32_t eax, edx;
   __asm__ __volatile__("xgetbv"
                        : "=a"(eax), "=d"(edx)
