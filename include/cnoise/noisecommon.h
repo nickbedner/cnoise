@@ -1,6 +1,6 @@
 #pragma once
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef NOISE_COMMON_H
+#define NOISE_COMMON_H
 
 #include <math.h>
 #include <omp.h>
@@ -124,13 +124,8 @@ static inline float value_noise_3d(int x, int y, int z, int seed);
 static inline float gradient_noise_3d(float fx, float fy, float fz, int ix, int iy, int iz, int seed);
 static inline float gradient_coherent_noise_3d(float x, float y, float z, int seed, enum NoiseQuality noise_quality);
 
-//for (int loop_num = 0; loop_num < 8; loop_num++)
-//  printf("N: %d is %d\n", loop_num, *((int32_t *)&n + loop_num));
-//for (int loop_num = 0; loop_num < 8; loop_num++)
-//  printf("N: %d is %d\n", loop_num, n);
-
 static inline void *noise_allocate(size_t alignment, size_t size) {
-#ifdef MIMALLOC_H
+#ifdef CUSTOM_ALLOCATOR
   return aligned_alloc(alignment, size);
 #else
   void *mem = malloc(size + alignment + sizeof(void *));
@@ -141,7 +136,7 @@ static inline void *noise_allocate(size_t alignment, size_t size) {
 }
 
 static inline void noise_free(float *noise_set) {
-#ifdef MIMALLOC_H
+#ifdef CUSTOM_ALLOCATOR
   free(noise_set);
 #else
   free(((void **)noise_set)[-1]);
@@ -282,12 +277,6 @@ static inline __m128 s_curve5_sse2(__m128 a) {
 static inline __m128 linear_interp_sse2(__m128 n0, __m128 n1, __m128 a) {
   return _mm_add_ps(_mm_mul_ps(_mm_sub_ps(_mm_set1_ps(1.0), a), n0), _mm_mul_ps(a, n1));
 }
-
-//static inline int int_value_noise_3d(int x, int y, int z, int seed) {
-//  int n = (X_NOISE_GEN * x + Y_NOISE_GEN * y + Z_NOISE_GEN * z + SEED_NOISE_GEN * seed) & 0x7fffffff;
-//  n = (n >> 13) ^ n;
-//  return (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff;
-//}
 
 // These 2 need work
 static inline __m128i int_value_noise_3d_sse2_full(__m128i x, __m128i y, __m128i z, int seed) {
@@ -801,4 +790,4 @@ static inline float gradient_coherent_noise_3d(float x, float y, float z, int se
   return linear_interp(iy0, iy1, zs);
 }
 
-#endif  // COMMON_H
+#endif  // NOISE_COMMON_H

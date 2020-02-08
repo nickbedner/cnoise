@@ -2,7 +2,7 @@
 #ifndef PERLIN_NOISE_H
 #define PERLIN_NOISE_H
 
-#include "common.h"
+#include "noisecommon.h"
 
 #define DEFAULT_PERLIN_FREQUENCY 1.0
 #define DEFAULT_PERLIN_LACUNARITY 2.0

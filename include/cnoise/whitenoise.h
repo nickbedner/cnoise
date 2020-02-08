@@ -2,7 +2,7 @@
 #ifndef WHITE_NOISE_H
 #define WHITE_NOISE_H
 
-#include "common.h"
+#include "noisecommon.h"
 
 #define DEFAULT_WHITE_SEED 0
 

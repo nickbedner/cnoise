@@ -2,7 +2,7 @@
 #ifndef BILLOW_NOISE_H
 #define BILLOW_NOISE_H
 
-#include "common.h"
+#include "noisecommon.h"
 
 #define DEFAULT_BILLOW_FREQUENCY 1.0
 #define DEFAULT_BILLOW_LACUNARITY 2.0

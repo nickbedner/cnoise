@@ -2,7 +2,7 @@
 #ifndef RIDGID_FRACTAL_NOISE_H
 #define RIDGID_FRACTAL_NOISE_H
 
-#include "common.h"
+#include "noisecommon.h"
 
 #define DEFAULT_RIDGED_FREQUENCY 1.0
 #define DEFAULT_RIDGED_LACUNARITY 2.0

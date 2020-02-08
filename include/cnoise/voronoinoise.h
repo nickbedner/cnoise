@@ -2,7 +2,7 @@
 #ifndef VORONOI_NOISE_H
 #define VORONOI_NOISE_H
 
-#include "common.h"
+#include "noisecommon.h"
 
 #define DEFAULT_VORONOI_FREQUENCY 1.0
 #define DEFAULT_VORONOI_DISPLACEMENT 1.0
