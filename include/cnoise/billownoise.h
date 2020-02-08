@@ -57,23 +57,18 @@ static inline void billow_noise_init(struct BillowNoise *billow_noise) {
 #ifdef ARCH_32_64
     case SIMD_AVX512F:
       billow_noise->billow_func = &billow_noise_eval_3d_fallback;
-      printf("Using AVX512\n");
       break;
     case SIMD_AVX2:
       billow_noise->billow_func = &billow_noise_eval_3d_avx2;
-      printf("Using AVX2\n");
       break;
     case SIMD_AVX:
       billow_noise->billow_func = &billow_noise_eval_3d_avx;
-      printf("Using AVX\n");
       break;
     case SIMD_SSE4_1:
       billow_noise->billow_func = &billow_noise_eval_3d_sse4_1;
-      printf("Using SSE4.1\n");
       break;
     case SIMD_SSE2:
       billow_noise->billow_func = &billow_noise_eval_3d_sse2;
-      printf("Using SSE2\n");
       break;
 #else
     case SIMD_NEON:
@@ -82,7 +77,6 @@ static inline void billow_noise_init(struct BillowNoise *billow_noise) {
 #endif
     default:
       billow_noise->billow_func = &billow_noise_eval_3d_fallback;
-      printf("Using fallback\n");
       break;
   }
 }

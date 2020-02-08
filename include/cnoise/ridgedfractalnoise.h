@@ -69,23 +69,18 @@ static inline void ridged_fractal_noise_init(struct RidgedFractalNoise *ridged_f
 #ifdef ARCH_32_64
     case SIMD_AVX512F:
       ridged_fractal_noise->ridged_func = &ridged_fractal_noise_eval_3d_fallback;
-      printf("Using AVX512\n");
       break;
     case SIMD_AVX2:
       ridged_fractal_noise->ridged_func = &ridged_fractal_noise_eval_3d_avx2;
-      printf("Using AVX2\n");
       break;
     case SIMD_AVX:
       ridged_fractal_noise->ridged_func = &ridged_fractal_noise_eval_3d_avx;
-      printf("Using AVX\n");
       break;
     case SIMD_SSE4_1:
       ridged_fractal_noise->ridged_func = &ridged_fractal_noise_eval_3d_sse4_1;
-      printf("Using SSE4.1\n");
       break;
     case SIMD_SSE2:
       ridged_fractal_noise->ridged_func = &ridged_fractal_noise_eval_3d_sse2;
-      printf("Using SSE2\n");
       break;
 #else
     case SIMD_NEON:
@@ -94,7 +89,6 @@ static inline void ridged_fractal_noise_init(struct RidgedFractalNoise *ridged_f
 #endif
     default:
       ridged_fractal_noise->ridged_func = &ridged_fractal_noise_eval_3d_fallback;
-      printf("Using fallback\n");
       break;
   }
 }

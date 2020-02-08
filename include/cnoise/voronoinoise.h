@@ -51,23 +51,18 @@ static inline void voronoi_noise_init(struct VoronoiNoise *voronoi_noise) {
 #ifdef ARCH_32_64
     case SIMD_AVX512F:
       voronoi_noise->voronoi_func = &voronoi_noise_eval_3d_fallback;
-      printf("Using AVX512\n");
       break;
     case SIMD_AVX2:
       voronoi_noise->voronoi_func = &voronoi_noise_eval_3d_avx2;
-      printf("Using AVX2\n");
       break;
     case SIMD_AVX:
       voronoi_noise->voronoi_func = &voronoi_noise_eval_3d_avx;
-      printf("Using AVX\n");
       break;
     case SIMD_SSE4_1:
       voronoi_noise->voronoi_func = &voronoi_noise_eval_3d_sse4_1;
-      printf("Using SSE4.1\n");
       break;
     case SIMD_SSE2:
       voronoi_noise->voronoi_func = &voronoi_noise_eval_3d_sse2;
-      printf("Using SSE2\n");
       break;
 #else
     case SIMD_NEON:
@@ -76,7 +71,6 @@ static inline void voronoi_noise_init(struct VoronoiNoise *voronoi_noise) {
 #endif
     default:
       voronoi_noise->voronoi_func = &voronoi_noise_eval_3d_fallback;
-      printf("Using fallback\n");
       break;
   }
 }
@@ -162,8 +156,6 @@ static inline float *voronoi_noise_eval_3d_fallback(struct VoronoiNoise *voronoi
         for (int z_cur = z_int - 2; z_cur <= z_int + 2; z_cur++) {
           for (int y_cur = y_int - 2; y_cur <= y_int + 2; y_cur++) {
             for (int x_cur = x_int - 2; x_cur <= x_int + 2; x_cur++) {
-              //printf("Value at x: %d is %d\n", x_dim, x_cur);
-
               float x_pos = x_cur + value_noise_3d(x_cur, y_cur, z_cur, voronoi_noise->seed);
               float y_pos = y_cur + value_noise_3d(x_cur, y_cur, z_cur, voronoi_noise->seed + 1);
               float z_pos = z_cur + value_noise_3d(x_cur, y_cur, z_cur, voronoi_noise->seed + 2);

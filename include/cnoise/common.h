@@ -130,14 +130,22 @@ static inline float gradient_coherent_noise_3d(float x, float y, float z, int se
 //  printf("N: %d is %d\n", loop_num, n);
 
 static inline void *noise_allocate(size_t alignment, size_t size) {
+#ifdef MIMALLOC_H
+  return aligned_alloc(alignment, size);
+#else
   void *mem = malloc(size + alignment + sizeof(void *));
   void **noise_set = (void **)(((uintptr_t)mem + alignment + sizeof(void *)) & ~(alignment - 1));
   noise_set[-1] = mem;
   return noise_set;
+#endif
 }
 
 static inline void noise_free(float *noise_set) {
+#ifdef MIMALLOC_H
+  free(noise_set);
+#else
   free(((void **)noise_set)[-1]);
+#endif
 }
 
 static inline int detect_simd_support() {
