@@ -29,6 +29,10 @@ struct BillowNoise {
   enum NoiseQuality noise_quality;
 };
 
+static inline float *billow_noise_eval_1d(struct BillowNoise *billow_noise, size_t x_size);
+static inline float *billow_noise_eval_2d(struct BillowNoise *billow_noise, size_t x_size, size_t y_size);
+static inline float *billow_noise_eval_3d(struct BillowNoise *billow_noise, size_t x_size, size_t y_size, size_t z_size);
+static inline float billow_noise_eval_3d_single(struct BillowNoise *billow_noise);
 static inline float *billow_noise_eval_3d_fallback(struct BillowNoise *billow_noise, size_t x_size, size_t y_size, size_t z_size);
 static inline float *billow_noise_eval_3d_sse2(struct BillowNoise *billow_noise, size_t x_size, size_t y_size, size_t z_size);
 static inline float *billow_noise_eval_3d_sse4_1(struct BillowNoise *billow_noise, size_t x_size, size_t y_size, size_t z_size);
@@ -93,6 +97,35 @@ static inline float *billow_noise_eval_2d(struct BillowNoise *billow_noise, size
 
 static inline float *billow_noise_eval_3d(struct BillowNoise *billow_noise, size_t x_size, size_t y_size, size_t z_size) {
   return billow_noise->billow_func(billow_noise, x_size, y_size, z_size);
+}
+
+static inline float billow_noise_eval_3d_single(struct BillowNoise *billow_noise) {
+  float value = 0.0;
+  float cur_persistence = 1.0;
+
+  float x = billow_noise->position[0] * billow_noise->frequency;
+  float y = billow_noise->position[1] * billow_noise->frequency;
+  float z = billow_noise->position[2] * billow_noise->frequency;
+
+  for (int cur_octave = 0; cur_octave < billow_noise->octave_count; cur_octave++) {
+    float nx = make_int_32_range(x);
+    float ny = make_int_32_range(y);
+    float nz = make_int_32_range(z);
+
+    int cur_seed = (billow_noise->seed + cur_octave) & 0xffffffff;
+    float signal = gradient_coherent_noise_3d(nx, ny, nz, cur_seed, billow_noise->noise_quality);
+    signal = 2.0 * fabs(signal) - 1.0;
+    value += signal * cur_persistence;
+
+    x *= billow_noise->lacunarity;
+    y *= billow_noise->lacunarity;
+    z *= billow_noise->lacunarity;
+
+    cur_persistence *= billow_noise->persistence;
+  }
+
+  value += 0.5;
+  return value;
 }
 
 static inline float *billow_noise_eval_3d_fallback(struct BillowNoise *billow_noise, size_t x_size, size_t y_size, size_t z_size) {

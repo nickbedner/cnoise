@@ -29,6 +29,10 @@ struct RidgedFractalNoise {
   enum NoiseQuality noise_quality;
 };
 
+static inline float *ridged_fractal_noise_eval_1d(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size);
+static inline float *ridged_fractal_noise_eval_2d(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size);
+static inline float *ridged_fractal_noise_eval_3d(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size, size_t z_size);
+static inline float ridged_fractal_noise_eval_3d_single(struct RidgedFractalNoise *ridged_fractal_noise);
 static inline float *ridged_fractal_noise_eval_3d_fallback(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size, size_t z_size);
 static inline float *ridged_fractal_noise_eval_3d_sse2(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size, size_t z_size);
 static inline float *ridged_fractal_noise_eval_3d_sse4_1(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size, size_t z_size);
@@ -105,6 +109,47 @@ static inline float *ridged_fractal_noise_eval_2d(struct RidgedFractalNoise *rid
 
 static inline float *ridged_fractal_noise_eval_3d(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size, size_t z_size) {
   return ridged_fractal_noise->ridged_func(ridged_fractal_noise, x_size, y_size, z_size);
+}
+
+static inline float ridged_fractal_noise_eval_3d_single(struct RidgedFractalNoise *ridged_fractal_noise) {
+  float x = ridged_fractal_noise->position[0] * ridged_fractal_noise->frequency;
+  float y = ridged_fractal_noise->position[1] * ridged_fractal_noise->frequency;
+  float z = ridged_fractal_noise->position[2] * ridged_fractal_noise->frequency;
+
+  float value = 0.0;
+  float weight = 1.0;
+
+  float offset = 1.0;
+  float gain = 2.0;
+
+  for (int cur_octave = 0; cur_octave < ridged_fractal_noise->octave_count; cur_octave++) {
+    float nx = make_int_32_range(x);
+    float ny = make_int_32_range(y);
+    float nz = make_int_32_range(z);
+
+    int cur_seed = (ridged_fractal_noise->seed + cur_octave) & 0x7fffffff;
+    float signal = gradient_coherent_noise_3d(nx, ny, nz, cur_seed, ridged_fractal_noise->noise_quality);
+
+    signal = fabs(signal);
+    signal = offset - signal;
+
+    signal *= signal;
+    signal *= weight;
+
+    weight = signal * gain;
+    if (weight > 1.0)
+      weight = 1.0;
+    else if (weight < 0.0)
+      weight = 0.0;
+
+    value += (signal * ridged_fractal_noise->spectral_weights[cur_octave]);
+
+    x *= ridged_fractal_noise->lacunarity;
+    y *= ridged_fractal_noise->lacunarity;
+    z *= ridged_fractal_noise->lacunarity;
+  }
+
+  return (value * 1.25) - 1.0;
 }
 
 static inline float *ridged_fractal_noise_eval_3d_fallback(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size, size_t z_size) {

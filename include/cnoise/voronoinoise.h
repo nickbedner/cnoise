@@ -25,6 +25,10 @@ struct VoronoiNoise {
   float *(*voronoi_func)(struct VoronoiNoise *, size_t, size_t, size_t);
 };
 
+static inline float *voronoi__noise_eval_1d(struct VoronoiNoise *voronoi_noise, size_t x_size);
+static inline float *voronoi__noise_eval_2d(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size);
+static inline float *voronoi__noise_eval_3d(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size, size_t z_size);
+static inline float voronoi_noise_eval_3d_single(struct VoronoiNoise *voronoi_noise);
 static inline float *voronoi_noise_eval_3d_fallback(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size, size_t z_size);
 static inline float *voronoi_noise_eval_3d_sse2(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size, size_t z_size);
 static inline float *voronoi_noise_eval_3d_sse4_1(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size, size_t z_size);
@@ -75,6 +79,65 @@ static inline void voronoi_noise_init(struct VoronoiNoise *voronoi_noise) {
       printf("Using fallback\n");
       break;
   }
+}
+
+static inline float *voronoi__noise_eval_1d(struct VoronoiNoise *voronoi_noise, size_t x_size) {
+  return voronoi_noise->voronoi_func(voronoi_noise, x_size, 1, 1);
+}
+
+static inline float *voronoi__noise_eval_2d(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size) {
+  return voronoi_noise->voronoi_func(voronoi_noise, x_size, y_size, 1);
+}
+
+static inline float *voronoi__noise_eval_3d(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size, size_t z_size) {
+  return voronoi_noise->voronoi_func(voronoi_noise, x_size, y_size, z_size);
+}
+
+static inline float voronoi_noise_eval_3d_single(struct VoronoiNoise *voronoi_noise) {
+  float x = voronoi_noise->position[0] * voronoi_noise->frequency;
+  float y = voronoi_noise->position[1] * voronoi_noise->frequency;
+  float z = voronoi_noise->position[2] * voronoi_noise->frequency;
+
+  int x_int = (x > 0.0 ? (int)x : (int)x - 1);
+  int y_int = (y > 0.0 ? (int)y : (int)y - 1);
+  int z_int = (z > 0.0 ? (int)z : (int)z - 1);
+
+  float min_dist = 2147483647.0;
+  float x_candidate = 0;
+  float y_candidate = 0;
+  float z_candidate = 0;
+
+  for (int z_cur = z_int - 2; z_cur <= z_int + 2; z_cur++) {
+    for (int y_cur = y_int - 2; y_cur <= y_int + 2; y_cur++) {
+      for (int x_cur = x_int - 2; x_cur <= x_int + 2; x_cur++) {
+        float x_pos = x_cur + value_noise_3d(x_cur, y_cur, z_cur, voronoi_noise->seed);
+        float y_pos = y_cur + value_noise_3d(x_cur, y_cur, z_cur, voronoi_noise->seed + 1);
+        float z_pos = z_cur + value_noise_3d(x_cur, y_cur, z_cur, voronoi_noise->seed + 2);
+        float x_dist = x_pos - x;
+        float y_dist = y_pos - y;
+        float z_dist = z_pos - z;
+        float dist = x_dist * x_dist + y_dist * y_dist + z_dist * z_dist;
+
+        if (dist < min_dist) {
+          min_dist = dist;
+          x_candidate = x_pos;
+          y_candidate = y_pos;
+          z_candidate = z_pos;
+        }
+      }
+    }
+  }
+
+  float value;
+  if (voronoi_noise->enable_distance) {
+    float x_dist = x_candidate - x;
+    float y_dist = y_candidate - y;
+    float z_dist = z_candidate - z;
+    value = sqrt(x_dist * x_dist + y_dist * y_dist + z_dist * z_dist) * SQRT_3 - 1.0;
+  } else
+    value = 0.0;
+
+  return value + (voronoi_noise->displacement * value_noise_3d((int)floor(x_candidate), (int)floor(y_candidate), (int)floor(z_candidate), voronoi_noise->seed));
 }
 
 static inline float *voronoi_noise_eval_3d_fallback(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size, size_t z_size) {

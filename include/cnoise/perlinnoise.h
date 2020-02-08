@@ -29,6 +29,10 @@ struct PerlinNoise {
   enum NoiseQuality noise_quality;
 };
 
+static inline float *perlin_noise_eval_1d(struct PerlinNoise *perlin_noise, size_t x_size);
+static inline float *perlin_noise_eval_2d(struct PerlinNoise *perlin_noise, size_t x_size, size_t y_size);
+static inline float *perlin_noise_eval_3d(struct PerlinNoise *perlin_noise, size_t x_size, size_t y_size, size_t z_size);
+static inline float perlin_noise_eval_3d_single(struct PerlinNoise *perlin_noise);
 static inline float *perlin_noise_eval_3d_fallback(struct PerlinNoise *perlin_noise, size_t x_size, size_t y_size, size_t z_size);
 static inline float *perlin_noise_eval_3d_sse2(struct PerlinNoise *perlin_noise, size_t x_size, size_t y_size, size_t z_size);
 static inline float *perlin_noise_eval_3d_sse4_1(struct PerlinNoise *perlin_noise, size_t x_size, size_t y_size, size_t z_size);
@@ -53,23 +57,23 @@ static inline void perlin_noise_init(struct PerlinNoise *perlin_noise) {
 #ifdef ARCH_32_64
     case SIMD_AVX512F:
       perlin_noise->perlin_func = &perlin_noise_eval_3d_fallback;
-      printf("Using AVX512\n");
+      //printf("Using AVX512\n");
       break;
     case SIMD_AVX2:
       perlin_noise->perlin_func = &perlin_noise_eval_3d_avx2;
-      printf("Using AVX2\n");
+      //printf("Using AVX2\n");
       break;
     case SIMD_AVX:
       perlin_noise->perlin_func = &perlin_noise_eval_3d_avx;
-      printf("Using AVX\n");
+      //printf("Using AVX\n");
       break;
     case SIMD_SSE4_1:
       perlin_noise->perlin_func = &perlin_noise_eval_3d_sse4_1;
-      printf("Using SSE4.1\n");
+      //printf("Using SSE4.1\n");
       break;
     case SIMD_SSE2:
       perlin_noise->perlin_func = &perlin_noise_eval_3d_sse2;
-      printf("Using SSE2\n");
+      //printf("Using SSE2\n");
       break;
 #else
     case SIMD_NEON:
@@ -78,7 +82,7 @@ static inline void perlin_noise_init(struct PerlinNoise *perlin_noise) {
 #endif
     default:
       perlin_noise->perlin_func = &perlin_noise_eval_3d_fallback;
-      printf("Using fallback\n");
+      //printf("Using fallback\n");
       break;
   }
 }
@@ -93,6 +97,33 @@ static inline float *perlin_noise_eval_2d(struct PerlinNoise *perlin_noise, size
 
 static inline float *perlin_noise_eval_3d(struct PerlinNoise *perlin_noise, size_t x_size, size_t y_size, size_t z_size) {
   return perlin_noise->perlin_func(perlin_noise, x_size, y_size, z_size);
+}
+
+static inline float perlin_noise_eval_3d_single(struct PerlinNoise *perlin_noise) {
+  float value = 0.0;
+  float cur_persistence = 1.0;
+
+  float x = perlin_noise->position[0] * perlin_noise->frequency;
+  float y = perlin_noise->position[1] * perlin_noise->frequency;
+  float z = perlin_noise->position[2] * perlin_noise->frequency;
+
+  for (int cur_octave = 0; cur_octave < perlin_noise->octave_count; cur_octave++) {
+    float nx = make_int_32_range(x);
+    float ny = make_int_32_range(y);
+    float nz = make_int_32_range(z);
+
+    int cur_seed = (perlin_noise->seed + cur_octave) & 0xffffffff;
+    float signal = gradient_coherent_noise_3d(nx, ny, nz, cur_seed, perlin_noise->noise_quality);
+    value += signal * cur_persistence;
+
+    x *= perlin_noise->lacunarity;
+    y *= perlin_noise->lacunarity;
+    z *= perlin_noise->lacunarity;
+
+    cur_persistence *= perlin_noise->persistence;
+  }
+
+  return value;
 }
 
 static inline float *perlin_noise_eval_3d_fallback(struct PerlinNoise *perlin_noise, size_t x_size, size_t y_size, size_t z_size) {
