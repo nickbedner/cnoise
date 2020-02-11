@@ -423,7 +423,7 @@ static inline int detect_simd_support() {
   bool avx2_supported = cpu_info[1] & (1 << 5) || false;
   bool avx512f_supported = cpu_info[1] & (1 << 16) || false;
 
-// Older OSX cpus supporting only avx seem to have broken support with modern intrinsics
+// Older OSX cpus supporting avx seem to be incomplete
 #ifdef __APPLE__
   if (avx_supported && avx2_supported == false)
     avx_supported = false;
