@@ -405,6 +405,10 @@ static inline void noise_free(float *noise_set) {
 #endif
 }
 
+static inline float noise_get(float *noise_set, int x_size, int y_size, int z_size, int x, int y, int z) {
+  return *(noise_set + (x + (y * x_size) + (z * (x_size * y_size))));
+}
+
 static inline int detect_simd_support() {
 #ifdef ARCH_32_64
   int cpu_info[4];
