@@ -5,7 +5,7 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/cec66d7aa0304d15ade4ac7b8a0aff95)](https://www.codacy.com/manual/Zalrioth/cnoise?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Zalrioth/cnoise&amp;utm_campaign=Badge_Grade)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Header only C noise library with SIMD, multithreading, and more. Will automatically select the best instruction set to use at runtime. Based on libnoise and FastNoise.
+Header only C noise library with SIMD, multithreading, and more. Will automatically select the best instruction set to use at runtime.
 
 ## Setting up a Project
 
@@ -55,6 +55,7 @@ int main(int argc, char* argv[]) {
 * ARM Neon
 * AVX-512F
 * Doc
+* OpenSimplex2 Noise
 * White Noise
 
 ### Planned
@@ -63,5 +64,4 @@ int main(int argc, char* argv[]) {
 * Cubic Noise
 * Hydraulic Noise
 * GLSL implementations
-* Open Simplex Noise
 * Sphere Noise
