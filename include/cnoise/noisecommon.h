@@ -74,6 +74,7 @@ enum SIMDType {
 
 static inline void *noise_allocate(size_t alignment, size_t size);
 static inline void noise_free(float *data);
+static inline float noise_get(float *noise_set, int x_size, int y_size, int z_size, int x, int y, int z);
 static inline int detect_simd_support();
 #ifdef ARCH_32_64
 // SSE2
