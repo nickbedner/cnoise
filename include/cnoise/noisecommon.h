@@ -511,7 +511,7 @@ static inline __m128i sse2_mm_mullo_epi32(__m128i a, __m128i b) {
 // SSE2 compatible extract32
 static inline int sse2_mm_extract_epi32(__m128i a, int index) {
   return *(((int *)&a) + index);
-  // Older osx devices don't support _mm_shuffle_epi32
+  // Older OSX devices don't support _mm_shuffle_epi32
   //switch (index) {
   //  case 0:
   //    return _mm_cvtsi128_si32(a);
