@@ -602,14 +602,14 @@ static inline __m128 gradient_noise_3d_sse2(__m128 fx, float fy, float fz, __m12
   vector_index = _mm_slli_epi32(vector_index, 2);
 
   __m128 xv_gradient = _mm_set_ps(g_random_vectors[sse2_mm_extract_epi32(vector_index, 3)], g_random_vectors[sse2_mm_extract_epi32(vector_index, 2)], g_random_vectors[sse2_mm_extract_epi32(vector_index, 1)], g_random_vectors[sse2_mm_extract_epi32(vector_index, 0)]);
-  float yv_gradient = g_random_vectors[sse2_mm_extract_epi32(vector_index, 0) + 1];
-  float zv_gradient = g_random_vectors[sse2_mm_extract_epi32(vector_index, 0) + 2];
+  __m128 yv_gradient = _mm_set_ps(g_random_vectors[sse2_mm_extract_epi32(vector_index, 3) + 1], g_random_vectors[sse2_mm_extract_epi32(vector_index, 2) + 1], g_random_vectors[sse2_mm_extract_epi32(vector_index, 1) + 1], g_random_vectors[sse2_mm_extract_epi32(vector_index, 0) + 1]);
+  __m128 zv_gradient = _mm_set_ps(g_random_vectors[sse2_mm_extract_epi32(vector_index, 3) + 2], g_random_vectors[sse2_mm_extract_epi32(vector_index, 2) + 2], g_random_vectors[sse2_mm_extract_epi32(vector_index, 1) + 2], g_random_vectors[sse2_mm_extract_epi32(vector_index, 0) + 2]);
 
   __m128 xv_point = _mm_sub_ps(fx, _mm_cvtepi32_ps(ix));
-  float yv_point = (fy - (float)iy);
-  float zv_point = (fz - (float)iz);
+  __m128 yv_point = _mm_sub_ps(_mm_set1_ps(fy), _mm_cvtepi32_ps(_mm_set1_epi32(iy)));
+  __m128 zv_point = _mm_sub_ps(_mm_set1_ps(fz), _mm_cvtepi32_ps(_mm_set1_epi32(iz)));
 
-  return _mm_mul_ps(_mm_add_ps(_mm_add_ps(_mm_mul_ps(xv_gradient, xv_point), _mm_mul_ps(_mm_set1_ps(yv_gradient), _mm_set1_ps(yv_point))), _mm_mul_ps(_mm_set1_ps(zv_gradient), _mm_set1_ps(zv_point))), _mm_set1_ps(2.12));
+  return _mm_mul_ps(_mm_add_ps(_mm_add_ps(_mm_mul_ps(xv_gradient, xv_point), _mm_mul_ps(yv_gradient, yv_point)), _mm_mul_ps(zv_gradient, zv_point)), _mm_set1_ps(2.12));
 }
 
 static inline __m128 gradient_coherent_noise_3d_sse2(__m128 x, float y, float z, int seed, enum NoiseQuality noise_quality) {
@@ -687,14 +687,14 @@ static inline __m128 gradient_noise_3d_sse4_1(__m128 fx, float fy, float fz, __m
   vector_index = _mm_slli_epi32(vector_index, 2);
 
   __m128 xv_gradient = _mm_set_ps(g_random_vectors[_mm_extract_epi32(vector_index, 3)], g_random_vectors[_mm_extract_epi32(vector_index, 2)], g_random_vectors[_mm_extract_epi32(vector_index, 1)], g_random_vectors[_mm_extract_epi32(vector_index, 0)]);
-  float yv_gradient = g_random_vectors[_mm_extract_epi32(vector_index, 0) + 1];
-  float zv_gradient = g_random_vectors[_mm_extract_epi32(vector_index, 0) + 2];
+  __m128 yv_gradient = _mm_set_ps(g_random_vectors[_mm_extract_epi32(vector_index, 3) + 1], g_random_vectors[_mm_extract_epi32(vector_index, 2) + 1], g_random_vectors[_mm_extract_epi32(vector_index, 1) + 1], g_random_vectors[_mm_extract_epi32(vector_index, 0) + 1]);
+  __m128 zv_gradient = _mm_set_ps(g_random_vectors[_mm_extract_epi32(vector_index, 3) + 2], g_random_vectors[_mm_extract_epi32(vector_index, 2) + 2], g_random_vectors[_mm_extract_epi32(vector_index, 1) + 2], g_random_vectors[_mm_extract_epi32(vector_index, 0) + 2]);
 
   __m128 xv_point = _mm_sub_ps(fx, _mm_cvtepi32_ps(ix));
-  float yv_point = (fy - (float)iy);
-  float zv_point = (fz - (float)iz);
+  __m128 yv_point = _mm_sub_ps(_mm_set1_ps(fy), _mm_cvtepi32_ps(_mm_set1_epi32(iy)));
+  __m128 zv_point = _mm_sub_ps(_mm_set1_ps(fz), _mm_cvtepi32_ps(_mm_set1_epi32(iz)));
 
-  return _mm_mul_ps(_mm_add_ps(_mm_add_ps(_mm_mul_ps(xv_gradient, xv_point), _mm_mul_ps(_mm_set1_ps(yv_gradient), _mm_set1_ps(yv_point))), _mm_mul_ps(_mm_set1_ps(zv_gradient), _mm_set1_ps(zv_point))), _mm_set1_ps(2.12));
+  return _mm_mul_ps(_mm_add_ps(_mm_add_ps(_mm_mul_ps(xv_gradient, xv_point), _mm_mul_ps(yv_gradient, yv_point)), _mm_mul_ps(zv_gradient, zv_point)), _mm_set1_ps(2.12));
 }
 
 static inline __m128 gradient_coherent_noise_3d_sse4_1(__m128 x, float y, float z, int seed, enum NoiseQuality noise_quality) {
@@ -812,14 +812,14 @@ static inline __m256 gradient_noise_3d_avx(__m256 fx, float fy, float fz, __m256
   vector_index_high = _mm_slli_epi32(vector_index_high, 2);
 
   __m256 xv_gradient = _mm256_set_ps(g_random_vectors[_mm_extract_epi32(vector_index_high, 3)], g_random_vectors[_mm_extract_epi32(vector_index_high, 2)], g_random_vectors[_mm_extract_epi32(vector_index_high, 1)], g_random_vectors[_mm_extract_epi32(vector_index_high, 0)], g_random_vectors[_mm_extract_epi32(vector_index_low, 3)], g_random_vectors[_mm_extract_epi32(vector_index_low, 2)], g_random_vectors[_mm_extract_epi32(vector_index_low, 1)], g_random_vectors[_mm_extract_epi32(vector_index_low, 0)]);
-  float yv_gradient = g_random_vectors[_mm_extract_epi32(vector_index_low, 0) + 1];
-  float zv_gradient = g_random_vectors[_mm_extract_epi32(vector_index_low, 0) + 2];
+  __m256 yv_gradient = _mm256_set_ps(g_random_vectors[_mm_extract_epi32(vector_index_high, 3) + 1], g_random_vectors[_mm_extract_epi32(vector_index_high, 2) + 1], g_random_vectors[_mm_extract_epi32(vector_index_high, 1) + 1], g_random_vectors[_mm_extract_epi32(vector_index_high, 0) + 1], g_random_vectors[_mm_extract_epi32(vector_index_low, 3) + 1], g_random_vectors[_mm_extract_epi32(vector_index_low, 2) + 1], g_random_vectors[_mm_extract_epi32(vector_index_low, 1) + 1], g_random_vectors[_mm_extract_epi32(vector_index_low, 0) + 1]);
+  __m256 zv_gradient = _mm256_set_ps(g_random_vectors[_mm_extract_epi32(vector_index_high, 3) + 2], g_random_vectors[_mm_extract_epi32(vector_index_high, 2) + 2], g_random_vectors[_mm_extract_epi32(vector_index_high, 1) + 2], g_random_vectors[_mm_extract_epi32(vector_index_high, 0) + 2], g_random_vectors[_mm_extract_epi32(vector_index_low, 3) + 2], g_random_vectors[_mm_extract_epi32(vector_index_low, 2) + 2], g_random_vectors[_mm_extract_epi32(vector_index_low, 1) + 2], g_random_vectors[_mm_extract_epi32(vector_index_low, 0) + 2]);
 
   __m256 xv_point = _mm256_sub_ps(fx, _mm256_cvtepi32_ps(ix));
-  float yv_point = (fy - (float)iy);
-  float zv_point = (fz - (float)iz);
+  __m256 yv_point = _mm256_sub_ps(_mm256_set1_ps(fy), _mm256_cvtepi32_ps(_mm256_set1_epi32(iy)));
+  __m256 zv_point = _mm256_sub_ps(_mm256_set1_ps(fz), _mm256_cvtepi32_ps(_mm256_set1_epi32(iz)));
 
-  return _mm256_mul_ps(_mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(xv_gradient, xv_point), _mm256_mul_ps(_mm256_set1_ps(yv_gradient), _mm256_set1_ps(yv_point))), _mm256_mul_ps(_mm256_set1_ps(zv_gradient), _mm256_set1_ps(zv_point))), _mm256_set1_ps(2.12));
+  return _mm256_mul_ps(_mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(xv_gradient, xv_point), _mm256_mul_ps(yv_gradient, yv_point)), _mm256_mul_ps(zv_gradient, zv_point)), _mm256_set1_ps(2.12));
 }
 
 static inline __m256 gradient_coherent_noise_3d_avx(__m256 x, float y, float z, int seed, enum NoiseQuality noise_quality) {
@@ -897,14 +897,14 @@ static inline __m256 gradient_noise_3d_avx2(__m256 fx, float fy, float fz, __m25
   vector_index = _mm256_slli_epi32(vector_index, 2);
 
   __m256 xv_gradient = _mm256_set_ps(g_random_vectors[_mm256_extract_epi32(vector_index, 7)], g_random_vectors[_mm256_extract_epi32(vector_index, 6)], g_random_vectors[_mm256_extract_epi32(vector_index, 5)], g_random_vectors[_mm256_extract_epi32(vector_index, 4)], g_random_vectors[_mm256_extract_epi32(vector_index, 3)], g_random_vectors[_mm256_extract_epi32(vector_index, 2)], g_random_vectors[_mm256_extract_epi32(vector_index, 1)], g_random_vectors[_mm256_extract_epi32(vector_index, 0)]);
-  float yv_gradient = g_random_vectors[_mm256_extract_epi32(vector_index, 0) + 1];
-  float zv_gradient = g_random_vectors[_mm256_extract_epi32(vector_index, 0) + 2];
+  __m256 yv_gradient = _mm256_set_ps(g_random_vectors[_mm256_extract_epi32(vector_index, 7) + 1], g_random_vectors[_mm256_extract_epi32(vector_index, 6) + 1], g_random_vectors[_mm256_extract_epi32(vector_index, 5) + 1], g_random_vectors[_mm256_extract_epi32(vector_index, 4) + 1], g_random_vectors[_mm256_extract_epi32(vector_index, 3) + 1], g_random_vectors[_mm256_extract_epi32(vector_index, 2) + 1], g_random_vectors[_mm256_extract_epi32(vector_index, 1) + 1], g_random_vectors[_mm256_extract_epi32(vector_index, 0) + 1]);
+  __m256 zv_gradient = _mm256_set_ps(g_random_vectors[_mm256_extract_epi32(vector_index, 7) + 2], g_random_vectors[_mm256_extract_epi32(vector_index, 6) + 2], g_random_vectors[_mm256_extract_epi32(vector_index, 5) + 2], g_random_vectors[_mm256_extract_epi32(vector_index, 4) + 2], g_random_vectors[_mm256_extract_epi32(vector_index, 3) + 2], g_random_vectors[_mm256_extract_epi32(vector_index, 2) + 2], g_random_vectors[_mm256_extract_epi32(vector_index, 1) + 2], g_random_vectors[_mm256_extract_epi32(vector_index, 0) + 2]);
 
   __m256 xv_point = _mm256_sub_ps(fx, _mm256_cvtepi32_ps(ix));
-  float yv_point = (fy - (float)iy);
-  float zv_point = (fz - (float)iz);
+  __m256 yv_point = _mm256_sub_ps(_mm256_set1_ps(fy), _mm256_cvtepi32_ps(_mm256_set1_epi32(iy)));
+  __m256 zv_point = _mm256_sub_ps(_mm256_set1_ps(fz), _mm256_cvtepi32_ps(_mm256_set1_epi32(iz)));
 
-  return _mm256_mul_ps(_mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(xv_gradient, xv_point), _mm256_mul_ps(_mm256_set1_ps(yv_gradient), _mm256_set1_ps(yv_point))), _mm256_mul_ps(_mm256_set1_ps(zv_gradient), _mm256_set1_ps(zv_point))), _mm256_set1_ps(2.12));
+  return _mm256_mul_ps(_mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(xv_gradient, xv_point), _mm256_mul_ps(yv_gradient, yv_point)), _mm256_mul_ps(zv_gradient, zv_point)), _mm256_set1_ps(2.12));
 }
 
 static inline __m256 gradient_coherent_noise_3d_avx2(__m256 x, float y, float z, int seed, enum NoiseQuality noise_quality) {
@@ -1019,14 +1019,15 @@ static inline float gradient_noise_3d(float fx, float fy, float fz, int ix, int 
   int vector_index = (X_NOISE_GEN * ix + Y_NOISE_GEN * iy + Z_NOISE_GEN * iz + SEED_NOISE_GEN * seed) & 0xffffffff;
   vector_index ^= (vector_index >> SHIFT_NOISE_GEN);
   vector_index &= 0xff;
+  vector_index <<= 2;
 
-  double xv_gradient = g_random_vectors[(vector_index << 2)];
-  double yv_gradient = g_random_vectors[(vector_index << 2) + 1];
-  double zv_gradient = g_random_vectors[(vector_index << 2) + 2];
+  float xv_gradient = g_random_vectors[vector_index];
+  float yv_gradient = g_random_vectors[vector_index + 1];
+  float zv_gradient = g_random_vectors[vector_index + 2];
 
-  double xv_point = (fx - (double)ix);
-  double yv_point = (fy - (double)iy);
-  double zv_point = (fz - (double)iz);
+  float xv_point = (fx - (float)ix);
+  float yv_point = (fy - (float)iy);
+  float zv_point = (fz - (float)iz);
 
   return ((xv_gradient * xv_point) + (yv_gradient * yv_point) + (zv_gradient * zv_point)) * 2.12;
 }

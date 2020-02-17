@@ -25,9 +25,9 @@ struct VoronoiNoise {
   float *(*voronoi_func)(struct VoronoiNoise *, size_t, size_t, size_t);
 };
 
-static inline float *voronoi__noise_eval_1d(struct VoronoiNoise *voronoi_noise, size_t x_size);
-static inline float *voronoi__noise_eval_2d(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size);
-static inline float *voronoi__noise_eval_3d(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size, size_t z_size);
+static inline float *voronoi_noise_eval_1d(struct VoronoiNoise *voronoi_noise, size_t x_size);
+static inline float *voronoi_noise_eval_2d(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size);
+static inline float *voronoi_noise_eval_3d(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size, size_t z_size);
 static inline float voronoi_noise_eval_3d_single(struct VoronoiNoise *voronoi_noise);
 static inline float *voronoi_noise_eval_3d_fallback(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size, size_t z_size);
 static inline float *voronoi_noise_eval_3d_sse2(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size, size_t z_size);
@@ -75,15 +75,15 @@ static inline void voronoi_noise_init(struct VoronoiNoise *voronoi_noise) {
   }
 }
 
-static inline float *voronoi__noise_eval_1d(struct VoronoiNoise *voronoi_noise, size_t x_size) {
+static inline float *voronoi_noise_eval_1d(struct VoronoiNoise *voronoi_noise, size_t x_size) {
   return voronoi_noise->voronoi_func(voronoi_noise, x_size, 1, 1);
 }
 
-static inline float *voronoi__noise_eval_2d(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size) {
+static inline float *voronoi_noise_eval_2d(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size) {
   return voronoi_noise->voronoi_func(voronoi_noise, x_size, y_size, 1);
 }
 
-static inline float *voronoi__noise_eval_3d(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size, size_t z_size) {
+static inline float *voronoi_noise_eval_3d(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size, size_t z_size) {
   return voronoi_noise->voronoi_func(voronoi_noise, x_size, y_size, z_size);
 }
 
@@ -135,14 +135,18 @@ static inline float voronoi_noise_eval_3d_single(struct VoronoiNoise *voronoi_no
 }
 
 static inline float *voronoi_noise_eval_3d_fallback(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size, size_t z_size) {
+#ifdef CUSTOM_ALLOCATOR
+  float *noise_set = malloc(sizeof(float) * x_size * y_size * z_size);
+#else
   float *noise_set = noise_allocate(sizeof(float), sizeof(float) * x_size * y_size * z_size);
+#endif
 #pragma omp parallel for collapse(3) if (voronoi_noise->parallel)
   for (int z_dim = 0; z_dim < z_size; z_dim++) {
     for (int y_dim = 0; y_dim < y_size; y_dim++) {
       for (int x_dim = 0; x_dim < x_size; x_dim++) {
-        float x = (voronoi_noise->position[0] * voronoi_noise->frequency) + (x_dim * voronoi_noise->step);
-        float y = (voronoi_noise->position[1] * voronoi_noise->frequency) + (y_dim * voronoi_noise->step);
-        float z = (voronoi_noise->position[2] * voronoi_noise->frequency) + (z_dim * voronoi_noise->step);
+        float x = (voronoi_noise->position[0] + (x_dim * voronoi_noise->step)) * voronoi_noise->frequency;
+        float y = (voronoi_noise->position[1] + (y_dim * voronoi_noise->step)) * voronoi_noise->frequency;
+        float z = (voronoi_noise->position[2] + (z_dim * voronoi_noise->step)) * voronoi_noise->frequency;
 
         int x_int = (x > 0.0 ? (int)x : (int)x - 1);
         int y_int = (y > 0.0 ? (int)y : (int)y - 1);
@@ -197,7 +201,7 @@ static inline float *voronoi_noise_eval_3d_sse2(struct VoronoiNoise *voronoi_noi
   for (int z_dim = 0; z_dim < z_size; z_dim++) {
     for (int y_dim = 0; y_dim < y_size; y_dim++) {
       for (int x_dim = 0; x_dim < x_size; x_dim += 4) {
-        __m128 x_vec = _mm_add_ps(_mm_set1_ps(voronoi_noise->position[0]), _mm_mul_ps(_mm_set_ps(x_dim + 3.0, x_dim + 2.0, x_dim + 1.0, x_dim), _mm_set1_ps(voronoi_noise->step * voronoi_noise->frequency)));
+        __m128 x_vec = _mm_mul_ps(_mm_add_ps(_mm_set1_ps(voronoi_noise->position[0]), _mm_mul_ps(_mm_set_ps(x_dim + 3.0, x_dim + 2.0, x_dim + 1.0, x_dim), _mm_set1_ps(voronoi_noise->step))), _mm_set1_ps(voronoi_noise->frequency));
         float y = (voronoi_noise->position[1] * voronoi_noise->frequency) + (y_dim * voronoi_noise->step);
         float z = (voronoi_noise->position[2] * voronoi_noise->frequency) + (z_dim * voronoi_noise->step);
 
@@ -267,7 +271,7 @@ static inline float *voronoi_noise_eval_3d_sse4_1(struct VoronoiNoise *voronoi_n
   for (int z_dim = 0; z_dim < z_size; z_dim++) {
     for (int y_dim = 0; y_dim < y_size; y_dim++) {
       for (int x_dim = 0; x_dim < x_size; x_dim += 4) {
-        __m128 x_vec = _mm_add_ps(_mm_set1_ps(voronoi_noise->position[0]), _mm_mul_ps(_mm_set_ps(x_dim + 3.0, x_dim + 2.0, x_dim + 1.0, x_dim), _mm_set1_ps(voronoi_noise->step * voronoi_noise->frequency)));
+        __m128 x_vec = _mm_mul_ps(_mm_add_ps(_mm_set1_ps(voronoi_noise->position[0]), _mm_mul_ps(_mm_set_ps(x_dim + 3.0, x_dim + 2.0, x_dim + 1.0, x_dim), _mm_set1_ps(voronoi_noise->step))), _mm_set1_ps(voronoi_noise->frequency));
         float y = (voronoi_noise->position[1] * voronoi_noise->frequency) + (y_dim * voronoi_noise->step);
         float z = (voronoi_noise->position[2] * voronoi_noise->frequency) + (z_dim * voronoi_noise->step);
 
@@ -324,9 +328,9 @@ static inline float *voronoi_noise_eval_3d_avx(struct VoronoiNoise *voronoi_nois
   for (int z_dim = 0; z_dim < z_size; z_dim++) {
     for (int y_dim = 0; y_dim < y_size; y_dim++) {
       for (int x_dim = 0; x_dim < x_size; x_dim += 8) {
-        __m256 x_vec = _mm256_add_ps(_mm256_set1_ps(voronoi_noise->position[0]), _mm256_mul_ps(_mm256_set_ps(x_dim + 7.0, x_dim + 6.0, x_dim + 5.0, x_dim + 4.0, x_dim + 3.0, x_dim + 2.0, x_dim + 1.0, x_dim), _mm256_set1_ps(voronoi_noise->step * voronoi_noise->frequency)));
-        float y = (voronoi_noise->position[1] * voronoi_noise->frequency) + (y_dim * voronoi_noise->step);
-        float z = (voronoi_noise->position[2] * voronoi_noise->frequency) + (z_dim * voronoi_noise->step);
+        __m256 x_vec = _mm256_mul_ps(_mm256_add_ps(_mm256_set1_ps(voronoi_noise->position[0]), _mm256_mul_ps(_mm256_set_ps(x_dim + 7.0, x_dim + 6.0, x_dim + 5.0, x_dim + 4.0, x_dim + 3.0, x_dim + 2.0, x_dim + 1.0, x_dim), _mm256_set1_ps(voronoi_noise->step))), _mm256_set1_ps(voronoi_noise->frequency));
+        float y = (voronoi_noise->position[1] + (y_dim * voronoi_noise->step)) * voronoi_noise->frequency;
+        float z = (voronoi_noise->position[2] + (z_dim * voronoi_noise->step)) * voronoi_noise->frequency;
 
         __m256i x_int = _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_blendv_ps(_mm256_sub_ps(x_vec, _mm256_set1_ps(1.0)), x_vec, _mm256_cmp_ps(x_vec, _mm256_setzero_ps(), _CMP_GT_OQ))));
         int y_int = (y > 0.0 ? (int)y : (int)y - 1);
@@ -383,9 +387,9 @@ static inline float *voronoi_noise_eval_3d_avx2(struct VoronoiNoise *voronoi_noi
   for (int z_dim = 0; z_dim < z_size; z_dim++) {
     for (int y_dim = 0; y_dim < y_size; y_dim++) {
       for (int x_dim = 0; x_dim < x_size; x_dim += 8) {
-        __m256 x_vec = _mm256_add_ps(_mm256_set1_ps(voronoi_noise->position[0]), _mm256_mul_ps(_mm256_set_ps(x_dim + 7.0, x_dim + 6.0, x_dim + 5.0, x_dim + 4.0, x_dim + 3.0, x_dim + 2.0, x_dim + 1.0, x_dim), _mm256_set1_ps(voronoi_noise->step * voronoi_noise->frequency)));
-        float y = (voronoi_noise->position[1] * voronoi_noise->frequency) + (y_dim * voronoi_noise->step);
-        float z = (voronoi_noise->position[2] * voronoi_noise->frequency) + (z_dim * voronoi_noise->step);
+        __m256 x_vec = _mm256_mul_ps(_mm256_add_ps(_mm256_set1_ps(voronoi_noise->position[0]), _mm256_mul_ps(_mm256_set_ps(x_dim + 7.0, x_dim + 6.0, x_dim + 5.0, x_dim + 4.0, x_dim + 3.0, x_dim + 2.0, x_dim + 1.0, x_dim), _mm256_set1_ps(voronoi_noise->step))), _mm256_set1_ps(voronoi_noise->frequency));
+        float y = (voronoi_noise->position[1] + (y_dim * voronoi_noise->step)) * voronoi_noise->frequency;
+        float z = (voronoi_noise->position[2] + (z_dim * voronoi_noise->step)) * voronoi_noise->frequency;
 
         __m256i x_int = _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_blendv_ps(_mm256_sub_ps(x_vec, _mm256_set1_ps(1.0)), x_vec, _mm256_cmp_ps(x_vec, _mm256_setzero_ps(), _CMP_GT_OQ))));
         int y_int = (y > 0.0 ? (int)y : (int)y - 1);

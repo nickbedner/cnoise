@@ -57,11 +57,11 @@ static inline void ridged_fractal_noise_init(struct RidgedFractalNoise *ridged_f
   ridged_fractal_noise->octave_count = DEFAULT_RIDGED_OCTAVE_COUNT;
   ridged_fractal_noise->seed = DEFAULT_RIDGED_SEED;
   ridged_fractal_noise->noise_quality = DEFAULT_RIDGED_QUALITY;
-  ridged_fractal_noise->position[0] = DEFAULT_PERLIN_POSITION_X;
-  ridged_fractal_noise->position[1] = DEFAULT_PERLIN_POSITION_Y;
-  ridged_fractal_noise->position[2] = DEFAULT_PERLIN_POSITION_Z;
-  ridged_fractal_noise->step = DEFAULT_PERLIN_STEP;
-  ridged_fractal_noise->parallel = DEFAULT_PERLIN_PARALLEL;
+  ridged_fractal_noise->position[0] = DEFAULT_RIDGED_POSITION_X;
+  ridged_fractal_noise->position[1] = DEFAULT_RIDGED_POSITION_Y;
+  ridged_fractal_noise->position[2] = DEFAULT_RIDGED_POSITION_Z;
+  ridged_fractal_noise->step = DEFAULT_RIDGED_STEP;
+  ridged_fractal_noise->parallel = DEFAULT_RIDGED_PARALLEL;
 
   ridged_fractal_noise_calc_spectral_weights(ridged_fractal_noise);
 
@@ -147,20 +147,27 @@ static inline float ridged_fractal_noise_eval_3d_single(struct RidgedFractalNois
 }
 
 static inline float *ridged_fractal_noise_eval_3d_fallback(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size, size_t z_size) {
+#ifdef CUSTOM_ALLOCATOR
+  float *noise_set = malloc(sizeof(float) * x_size * y_size * z_size);
+#else
   float *noise_set = noise_allocate(sizeof(float), sizeof(float) * x_size * y_size * z_size);
+#endif
 #pragma omp parallel for collapse(3) if (ridged_fractal_noise->parallel)
   for (int z_dim = 0; z_dim < z_size; z_dim++) {
     for (int y_dim = 0; y_dim < y_size; y_dim++) {
       for (int x_dim = 0; x_dim < x_size; x_dim++) {
-        float x = (ridged_fractal_noise->position[0] * ridged_fractal_noise->frequency) + (x_dim * ridged_fractal_noise->step);
-        float y = (ridged_fractal_noise->position[1] * ridged_fractal_noise->frequency) + (y_dim * ridged_fractal_noise->step);
-        float z = (ridged_fractal_noise->position[2] * ridged_fractal_noise->frequency) + (z_dim * ridged_fractal_noise->step);
+        float x = (ridged_fractal_noise->position[0] + (x_dim * ridged_fractal_noise->step)) * ridged_fractal_noise->frequency;
+        float y = (ridged_fractal_noise->position[1] + (y_dim * ridged_fractal_noise->step)) * ridged_fractal_noise->frequency;
+        float z = (ridged_fractal_noise->position[2] + (z_dim * ridged_fractal_noise->step)) * ridged_fractal_noise->frequency;
 
         float value = 0.0;
         float weight = 1.0;
 
         float offset = 1.0;
         float gain = 2.0;
+
+        if (x_dim == 7 && y_dim == 0 && z_dim == 0)
+          asm("nop");
 
         for (int cur_octave = 0; cur_octave < ridged_fractal_noise->octave_count; cur_octave++) {
           float nx = make_int_32_range(x);
@@ -202,7 +209,7 @@ static inline float *ridged_fractal_noise_eval_3d_sse2(struct RidgedFractalNoise
   for (int z_dim = 0; z_dim < z_size; z_dim++) {
     for (int y_dim = 0; y_dim < y_size; y_dim++) {
       for (int x_dim = 0; x_dim < x_size; x_dim += 4) {
-        __m128 x_vec = _mm_add_ps(_mm_set1_ps(ridged_fractal_noise->position[0]), _mm_mul_ps(_mm_set_ps(x_dim + 3.0, x_dim + 2.0, x_dim + 1.0, x_dim), _mm_set1_ps(ridged_fractal_noise->step * ridged_fractal_noise->frequency)));
+        __m128 x_vec = _mm_mul_ps(_mm_add_ps(_mm_set1_ps(ridged_fractal_noise->position[0]), _mm_mul_ps(_mm_set_ps(x_dim + 3.0, x_dim + 2.0, x_dim + 1.0, x_dim), _mm_set1_ps(ridged_fractal_noise->step))), _mm_set1_ps(ridged_fractal_noise->frequency));
         float y = (ridged_fractal_noise->position[1] * ridged_fractal_noise->frequency) + (y_dim * ridged_fractal_noise->step);
         float z = (ridged_fractal_noise->position[2] * ridged_fractal_noise->frequency) + (z_dim * ridged_fractal_noise->step);
 
@@ -252,7 +259,7 @@ static inline float *ridged_fractal_noise_eval_3d_sse4_1(struct RidgedFractalNoi
   for (int z_dim = 0; z_dim < z_size; z_dim++) {
     for (int y_dim = 0; y_dim < y_size; y_dim++) {
       for (int x_dim = 0; x_dim < x_size; x_dim += 4) {
-        __m128 x_vec = _mm_add_ps(_mm_set1_ps(ridged_fractal_noise->position[0]), _mm_mul_ps(_mm_set_ps(x_dim + 3.0, x_dim + 2.0, x_dim + 1.0, x_dim), _mm_set1_ps(ridged_fractal_noise->step * ridged_fractal_noise->frequency)));
+        __m128 x_vec = _mm_mul_ps(_mm_add_ps(_mm_set1_ps(ridged_fractal_noise->position[0]), _mm_mul_ps(_mm_set_ps(x_dim + 3.0, x_dim + 2.0, x_dim + 1.0, x_dim), _mm_set1_ps(ridged_fractal_noise->step))), _mm_set1_ps(ridged_fractal_noise->frequency));
         float y = (ridged_fractal_noise->position[1] * ridged_fractal_noise->frequency) + (y_dim * ridged_fractal_noise->step);
         float z = (ridged_fractal_noise->position[2] * ridged_fractal_noise->frequency) + (z_dim * ridged_fractal_noise->step);
 
@@ -300,7 +307,7 @@ static inline float *ridged_fractal_noise_eval_3d_avx(struct RidgedFractalNoise 
   for (int z_dim = 0; z_dim < z_size; z_dim++) {
     for (int y_dim = 0; y_dim < y_size; y_dim++) {
       for (int x_dim = 0; x_dim < x_size; x_dim += 8) {
-        __m256 x_vec = _mm256_add_ps(_mm256_set1_ps(ridged_fractal_noise->position[0]), _mm256_mul_ps(_mm256_set_ps(x_dim + 7.0, x_dim + 6.0, x_dim + 5.0, x_dim + 4.0, x_dim + 3.0, x_dim + 2.0, x_dim + 1.0, x_dim), _mm256_set1_ps(ridged_fractal_noise->step * ridged_fractal_noise->frequency)));
+        __m256 x_vec = _mm256_mul_ps(_mm256_add_ps(_mm256_set1_ps(ridged_fractal_noise->position[0]), _mm256_mul_ps(_mm256_set_ps(x_dim + 7.0, x_dim + 6.0, x_dim + 5.0, x_dim + 4.0, x_dim + 3.0, x_dim + 2.0, x_dim + 1.0, x_dim), _mm256_set1_ps(ridged_fractal_noise->step))), _mm256_set1_ps(ridged_fractal_noise->frequency));
         float y = (ridged_fractal_noise->position[1] * ridged_fractal_noise->frequency) + (y_dim * ridged_fractal_noise->step);
         float z = (ridged_fractal_noise->position[2] * ridged_fractal_noise->frequency) + (z_dim * ridged_fractal_noise->step);
 
@@ -348,12 +355,15 @@ static inline float *ridged_fractal_noise_eval_3d_avx2(struct RidgedFractalNoise
   for (int z_dim = 0; z_dim < z_size; z_dim++) {
     for (int y_dim = 0; y_dim < y_size; y_dim++) {
       for (int x_dim = 0; x_dim < x_size; x_dim += 8) {
-        __m256 x_vec = _mm256_add_ps(_mm256_set1_ps(ridged_fractal_noise->position[0]), _mm256_mul_ps(_mm256_set_ps(x_dim + 7.0, x_dim + 6.0, x_dim + 5.0, x_dim + 4.0, x_dim + 3.0, x_dim + 2.0, x_dim + 1.0, x_dim), _mm256_set1_ps(ridged_fractal_noise->step * ridged_fractal_noise->frequency)));
-        float y = (ridged_fractal_noise->position[1] * ridged_fractal_noise->frequency) + (y_dim * ridged_fractal_noise->step);
-        float z = (ridged_fractal_noise->position[2] * ridged_fractal_noise->frequency) + (z_dim * ridged_fractal_noise->step);
+        __m256 x_vec = _mm256_mul_ps(_mm256_add_ps(_mm256_set1_ps(ridged_fractal_noise->position[0]), _mm256_mul_ps(_mm256_set_ps(x_dim + 7.0, x_dim + 6.0, x_dim + 5.0, x_dim + 4.0, x_dim + 3.0, x_dim + 2.0, x_dim + 1.0, x_dim), _mm256_set1_ps(ridged_fractal_noise->step))), _mm256_set1_ps(ridged_fractal_noise->frequency));
+        float y = (ridged_fractal_noise->position[1] + (y_dim * ridged_fractal_noise->step)) * ridged_fractal_noise->frequency;
+        float z = (ridged_fractal_noise->position[2] + (z_dim * ridged_fractal_noise->step)) * ridged_fractal_noise->frequency;
 
         __m256 value = _mm256_set1_ps(0.0);
         __m256 weight = _mm256_set1_ps(1.0);
+
+        if (x_dim == 0 && y_dim == 0 && z_dim == 1)
+          asm("nop");
 
         float offset = 1.0;
         float gain = 2.0;
