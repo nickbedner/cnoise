@@ -32,7 +32,7 @@ struct BillowNoise {
 static inline float *billow_noise_eval_1d(struct BillowNoise *billow_noise, size_t x_size);
 static inline float *billow_noise_eval_2d(struct BillowNoise *billow_noise, size_t x_size, size_t y_size);
 static inline float *billow_noise_eval_3d(struct BillowNoise *billow_noise, size_t x_size, size_t y_size, size_t z_size);
-static inline float billow_noise_eval_3d_single(struct BillowNoise *billow_noise);
+static inline float billow_noise_eval_3d_single(struct BillowNoise *billow_noise, float x_pos, float y_pos, float z_pos);
 static inline float *billow_noise_eval_3d_fallback(struct BillowNoise *billow_noise, size_t x_size, size_t y_size, size_t z_size);
 static inline float *billow_noise_eval_3d_sse2(struct BillowNoise *billow_noise, size_t x_size, size_t y_size, size_t z_size);
 static inline float *billow_noise_eval_3d_sse4_1(struct BillowNoise *billow_noise, size_t x_size, size_t y_size, size_t z_size);
@@ -93,13 +93,13 @@ static inline float *billow_noise_eval_3d(struct BillowNoise *billow_noise, size
   return billow_noise->billow_func(billow_noise, x_size, y_size, z_size);
 }
 
-static inline float billow_noise_eval_3d_single(struct BillowNoise *billow_noise) {
+static inline float billow_noise_eval_3d_single(struct BillowNoise *billow_noise, float x_pos, float y_pos, float z_pos) {
+  float x = (billow_noise->position[0] + (x_pos * billow_noise->step)) * billow_noise->frequency;
+  float y = (billow_noise->position[1] + (y_pos * billow_noise->step)) * billow_noise->frequency;
+  float z = (billow_noise->position[2] + (z_pos * billow_noise->step)) * billow_noise->frequency;
+
   float value = 0.0;
   float cur_persistence = 1.0;
-
-  float x = billow_noise->position[0] * billow_noise->frequency;
-  float y = billow_noise->position[1] * billow_noise->frequency;
-  float z = billow_noise->position[2] * billow_noise->frequency;
 
   for (int cur_octave = 0; cur_octave < billow_noise->octave_count; cur_octave++) {
     float nx = make_int_32_range(x);
@@ -132,12 +132,12 @@ static inline float *billow_noise_eval_3d_fallback(struct BillowNoise *billow_no
   for (int z_dim = 0; z_dim < z_size; z_dim++) {
     for (int y_dim = 0; y_dim < y_size; y_dim++) {
       for (int x_dim = 0; x_dim < x_size; x_dim++) {
-        float value = 0.0;
-        float cur_persistence = 1.0;
-
         float x = (billow_noise->position[0] * billow_noise->frequency) + (x_dim * billow_noise->step);
         float y = (billow_noise->position[1] * billow_noise->frequency) + (y_dim * billow_noise->step);
         float z = (billow_noise->position[2] * billow_noise->frequency) + (z_dim * billow_noise->step);
+
+        float value = 0.0;
+        float cur_persistence = 1.0;
 
         for (int cur_octave = 0; cur_octave < billow_noise->octave_count; cur_octave++) {
           float nx = make_int_32_range(x);

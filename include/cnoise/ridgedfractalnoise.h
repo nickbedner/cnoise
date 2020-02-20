@@ -32,7 +32,7 @@ struct RidgedFractalNoise {
 static inline float *ridged_fractal_noise_eval_1d(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size);
 static inline float *ridged_fractal_noise_eval_2d(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size);
 static inline float *ridged_fractal_noise_eval_3d(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size, size_t z_size);
-static inline float ridged_fractal_noise_eval_3d_single(struct RidgedFractalNoise *ridged_fractal_noise);
+static inline float ridged_fractal_noise_eval_3d_single(struct RidgedFractalNoise *ridged_fractal_noise, float x_pos, float y_pos, float z_pos);
 static inline float *ridged_fractal_noise_eval_3d_fallback(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size, size_t z_size);
 static inline float *ridged_fractal_noise_eval_3d_sse2(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size, size_t z_size);
 static inline float *ridged_fractal_noise_eval_3d_sse4_1(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size, size_t z_size);
@@ -105,10 +105,10 @@ static inline float *ridged_fractal_noise_eval_3d(struct RidgedFractalNoise *rid
   return ridged_fractal_noise->ridged_func(ridged_fractal_noise, x_size, y_size, z_size);
 }
 
-static inline float ridged_fractal_noise_eval_3d_single(struct RidgedFractalNoise *ridged_fractal_noise) {
-  float x = ridged_fractal_noise->position[0] * ridged_fractal_noise->frequency;
-  float y = ridged_fractal_noise->position[1] * ridged_fractal_noise->frequency;
-  float z = ridged_fractal_noise->position[2] * ridged_fractal_noise->frequency;
+static inline float ridged_fractal_noise_eval_3d_single(struct RidgedFractalNoise *ridged_fractal_noise, float x_pos, float y_pos, float z_pos) {
+  float x = (ridged_fractal_noise->position[0] + (x_pos * ridged_fractal_noise->step)) * ridged_fractal_noise->frequency;
+  float y = (ridged_fractal_noise->position[1] + (y_pos * ridged_fractal_noise->step)) * ridged_fractal_noise->frequency;
+  float z = (ridged_fractal_noise->position[2] + (z_pos * ridged_fractal_noise->step)) * ridged_fractal_noise->frequency;
 
   float value = 0.0;
   float weight = 1.0;

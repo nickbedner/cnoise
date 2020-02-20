@@ -28,7 +28,7 @@ struct VoronoiNoise {
 static inline float *voronoi_noise_eval_1d(struct VoronoiNoise *voronoi_noise, size_t x_size);
 static inline float *voronoi_noise_eval_2d(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size);
 static inline float *voronoi_noise_eval_3d(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size, size_t z_size);
-static inline float voronoi_noise_eval_3d_single(struct VoronoiNoise *voronoi_noise);
+static inline float voronoi_noise_eval_3d_single(struct VoronoiNoise *voronoi_noise, float x_pos, float y_pos, float z_pos);
 static inline float *voronoi_noise_eval_3d_fallback(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size, size_t z_size);
 static inline float *voronoi_noise_eval_3d_sse2(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size, size_t z_size);
 static inline float *voronoi_noise_eval_3d_sse4_1(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size, size_t z_size);
@@ -87,10 +87,10 @@ static inline float *voronoi_noise_eval_3d(struct VoronoiNoise *voronoi_noise, s
   return voronoi_noise->voronoi_func(voronoi_noise, x_size, y_size, z_size);
 }
 
-static inline float voronoi_noise_eval_3d_single(struct VoronoiNoise *voronoi_noise) {
-  float x = voronoi_noise->position[0] * voronoi_noise->frequency;
-  float y = voronoi_noise->position[1] * voronoi_noise->frequency;
-  float z = voronoi_noise->position[2] * voronoi_noise->frequency;
+static inline float voronoi_noise_eval_3d_single(struct VoronoiNoise *voronoi_noise, float x_pos, float y_pos, float z_pos) {
+  float x = (voronoi_noise->position[0] + (x_pos * voronoi_noise->step)) * voronoi_noise->frequency;
+  float y = (voronoi_noise->position[1] + (y_pos * voronoi_noise->step)) * voronoi_noise->frequency;
+  float z = (voronoi_noise->position[2] + (z_pos * voronoi_noise->step)) * voronoi_noise->frequency;
 
   int x_int = (x > 0.0 ? (int)x : (int)x - 1);
   int y_int = (y > 0.0 ? (int)y : (int)y - 1);

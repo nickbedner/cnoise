@@ -32,7 +32,7 @@ struct PerlinNoise {
 static inline float *perlin_noise_eval_1d(struct PerlinNoise *perlin_noise, size_t x_size);
 static inline float *perlin_noise_eval_2d(struct PerlinNoise *perlin_noise, size_t x_size, size_t y_size);
 static inline float *perlin_noise_eval_3d(struct PerlinNoise *perlin_noise, size_t x_size, size_t y_size, size_t z_size);
-static inline float perlin_noise_eval_3d_single(struct PerlinNoise *perlin_noise);
+static inline float perlin_noise_eval_3d_single(struct PerlinNoise *perlin_noise, float x_pos, float y_pos, float z_pos);
 static inline float *perlin_noise_eval_3d_fallback(struct PerlinNoise *perlin_noise, size_t x_size, size_t y_size, size_t z_size);
 static inline float *perlin_noise_eval_3d_sse2(struct PerlinNoise *perlin_noise, size_t x_size, size_t y_size, size_t z_size);
 static inline float *perlin_noise_eval_3d_sse4_1(struct PerlinNoise *perlin_noise, size_t x_size, size_t y_size, size_t z_size);
@@ -93,13 +93,13 @@ static inline float *perlin_noise_eval_3d(struct PerlinNoise *perlin_noise, size
   return perlin_noise->perlin_func(perlin_noise, x_size, y_size, z_size);
 }
 
-static inline float perlin_noise_eval_3d_single(struct PerlinNoise *perlin_noise) {
+static inline float perlin_noise_eval_3d_single(struct PerlinNoise *perlin_noise, float x_pos, float y_pos, float z_pos) {
+  float x = (perlin_noise->position[0] + (x_pos * perlin_noise->step)) * perlin_noise->frequency;
+  float y = (perlin_noise->position[1] + (y_pos * perlin_noise->step)) * perlin_noise->frequency;
+  float z = (perlin_noise->position[2] + (z_pos * perlin_noise->step)) * perlin_noise->frequency;
+
   float value = 0.0;
   float cur_persistence = 1.0;
-
-  float x = perlin_noise->position[0] * perlin_noise->frequency;
-  float y = perlin_noise->position[1] * perlin_noise->frequency;
-  float z = perlin_noise->position[2] * perlin_noise->frequency;
 
   for (int cur_octave = 0; cur_octave < perlin_noise->octave_count; cur_octave++) {
     float nx = make_int_32_range(x);
@@ -130,12 +130,12 @@ static inline float *perlin_noise_eval_3d_fallback(struct PerlinNoise *perlin_no
   for (int z_dim = 0; z_dim < z_size; z_dim++) {
     for (int y_dim = 0; y_dim < y_size; y_dim++) {
       for (int x_dim = 0; x_dim < x_size; x_dim++) {
-        float value = 0.0;
-        float cur_persistence = 1.0;
-
         float x = (perlin_noise->position[0] * perlin_noise->frequency) + (x_dim * perlin_noise->step);
         float y = (perlin_noise->position[1] * perlin_noise->frequency) + (y_dim * perlin_noise->step);
         float z = (perlin_noise->position[2] * perlin_noise->frequency) + (z_dim * perlin_noise->step);
+
+        float value = 0.0;
+        float cur_persistence = 1.0;
 
         for (int cur_octave = 0; cur_octave < perlin_noise->octave_count; cur_octave++) {
           float nx = make_int_32_range(x);
