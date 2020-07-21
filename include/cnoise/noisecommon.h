@@ -390,19 +390,21 @@ static const double g_random_vectors[256 * 4] =
 static inline void *noise_allocate(size_t alignment, size_t size) {
 #ifdef CUSTOM_ALLOCATOR
   return aligned_alloc(alignment, size);
+#elif defined(PLATFORM_WIN32)
+  // TODO: No clue why windows needs extra buffer, probably alignment problem
+  return _aligned_malloc(size + (size / 64), alignment);
 #else
-  void *mem = malloc(size + alignment + sizeof(void *));
-  void **noise_set = (void **)(((uintptr_t)mem + alignment + sizeof(void *)) & ~(alignment - 1));
-  noise_set[-1] = mem;
-  return noise_set;
+  return aligned_alloc(alignment, size);
 #endif
 }
 
 static inline void noise_free(float *noise_set) {
 #ifdef CUSTOM_ALLOCATOR
   free(noise_set);
+#elif defined(PLATFORM_WIN32)
+  return _aligned_free(noise_set);
 #else
-  free(((void **)noise_set)[-1]);
+  free(noise_set);
 #endif
 }
 
