@@ -97,9 +97,9 @@ static inline float sphere_noise_eval_3d_single(struct SphereNoise *sphere_noise
 }
 
 static inline float *sphere_noise_eval_3d_fallback(struct SphereNoise *sphere_noise, size_t x_size, size_t y_size, size_t z_size) {
-  float *noise_set = noise_allocate(sizeof(__m64), sizeof(float) * x_size * y_size * z_size);
+  float *noise_set = noise_allocate(sizeof(float), sizeof(float) * x_size * y_size * z_size);
 
-  //#pragma omp parallel for collapse(3) if (sphere_noise->parallel)
+#pragma omp parallel for collapse(3) if (sphere_noise->parallel)
   for (int z_dim = 0; z_dim < z_size; z_dim++) {
     for (int y_dim = 0; y_dim < y_size; y_dim++) {
       for (int x_dim = 0; x_dim < x_size; x_dim++) {
