@@ -395,7 +395,7 @@ static inline void *noise_allocate(size_t alignment, size_t size) {
   return _aligned_malloc(size + (size / 64), alignment);
 #elif defined(__APPLE__)
   void *alloc = NULL;
-  posix_memalign(&alloc alignment, size);
+  posix_memalign(&alloc, alignment, size);
   return alloc;
 #else
   return aligned_alloc(alignment, size);
