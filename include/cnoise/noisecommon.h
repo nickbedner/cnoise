@@ -393,6 +393,10 @@ static inline void *noise_allocate(size_t alignment, size_t size) {
 #elif defined(PLATFORM_WIN32)
   // TODO: No clue why windows needs extra buffer, probably alignment problem
   return _aligned_malloc(size + (size / 64), alignment);
+#elif defined(__APPLE__)
+  void *alloc = NULL;
+  posix_memalign(&alloc alignment, size);
+  return alloc;
 #else
   return aligned_alloc(alignment, size);
 #endif
