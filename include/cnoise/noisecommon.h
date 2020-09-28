@@ -116,6 +116,7 @@ static inline __m256 value_noise_3d_avx2_full(__m256i x, __m256i y, __m256i z, i
 static inline __m256 value_noise_3d_avx2(__m256i x, int y, int z, int seed);
 static inline __m256 gradient_noise_3d_avx2(__m256 fx, float fy, float fz, __m256i ix, int iy, int iz, int seed);
 static inline __m256 gradient_coherent_noise_3d_avx2(__m256 x, float y, float z, int seed, enum NoiseQuality noise_quality);
+static inline __m256 gradient_coherent_noise_3d_avx2_normals(__m256 x, __m256 y, __m256 z, int seed, enum NoiseQuality noise_quality);
 #endif
 // Fallback
 static inline float make_int_32_range(float n);
@@ -913,6 +914,26 @@ static inline __m256 gradient_noise_3d_avx2(__m256 fx, float fy, float fz, __m25
   return _mm256_mul_ps(_mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(xv_gradient, xv_point), _mm256_mul_ps(yv_gradient, yv_point)), _mm256_mul_ps(zv_gradient, zv_point)), _mm256_set1_ps(2.12));
 }
 
+static inline __m256 gradient_noise_3d_avx2_normals(__m256 fx, __m256i fy, __m256i fz, __m256i ix, __m256i iy, __m256i iz, int seed) {
+  __m256i y = _mm256_mullo_epi32(_mm256_set1_epi32(Y_NOISE_GEN), iy);
+  __m256i z = _mm256_mullo_epi32(_mm256_set1_epi32(Z_NOISE_GEN), iz);
+  __m256i y_z_seed = _mm256_add_epi32(_mm256_add_epi32(y, _mm256_set1_epi32(SEED_NOISE_GEN * seed)), z);
+  __m256i vector_index = _mm256_and_si256(_mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(X_NOISE_GEN), ix), y_z_seed), _mm256_set1_epi32(0xffffffff));
+  vector_index = _mm256_xor_si256(vector_index, _mm256_srli_epi32(vector_index, SHIFT_NOISE_GEN));
+  vector_index = _mm256_and_si256(vector_index, _mm256_set1_epi32(0xff));
+  vector_index = _mm256_slli_epi32(vector_index, 2);
+
+  __m256 xv_gradient = _mm256_set_ps(g_random_vectors[_mm256_extract_epi32(vector_index, 7)], g_random_vectors[_mm256_extract_epi32(vector_index, 6)], g_random_vectors[_mm256_extract_epi32(vector_index, 5)], g_random_vectors[_mm256_extract_epi32(vector_index, 4)], g_random_vectors[_mm256_extract_epi32(vector_index, 3)], g_random_vectors[_mm256_extract_epi32(vector_index, 2)], g_random_vectors[_mm256_extract_epi32(vector_index, 1)], g_random_vectors[_mm256_extract_epi32(vector_index, 0)]);
+  __m256 yv_gradient = _mm256_set_ps(g_random_vectors[_mm256_extract_epi32(vector_index, 7) + 1], g_random_vectors[_mm256_extract_epi32(vector_index, 6) + 1], g_random_vectors[_mm256_extract_epi32(vector_index, 5) + 1], g_random_vectors[_mm256_extract_epi32(vector_index, 4) + 1], g_random_vectors[_mm256_extract_epi32(vector_index, 3) + 1], g_random_vectors[_mm256_extract_epi32(vector_index, 2) + 1], g_random_vectors[_mm256_extract_epi32(vector_index, 1) + 1], g_random_vectors[_mm256_extract_epi32(vector_index, 0) + 1]);
+  __m256 zv_gradient = _mm256_set_ps(g_random_vectors[_mm256_extract_epi32(vector_index, 7) + 2], g_random_vectors[_mm256_extract_epi32(vector_index, 6) + 2], g_random_vectors[_mm256_extract_epi32(vector_index, 5) + 2], g_random_vectors[_mm256_extract_epi32(vector_index, 4) + 2], g_random_vectors[_mm256_extract_epi32(vector_index, 3) + 2], g_random_vectors[_mm256_extract_epi32(vector_index, 2) + 2], g_random_vectors[_mm256_extract_epi32(vector_index, 1) + 2], g_random_vectors[_mm256_extract_epi32(vector_index, 0) + 2]);
+
+  __m256 xv_point = _mm256_sub_ps(fx, _mm256_cvtepi32_ps(ix));
+  __m256 yv_point = _mm256_sub_ps(fy, _mm256_cvtepi32_ps(iy));
+  __m256 zv_point = _mm256_sub_ps(fz, _mm256_cvtepi32_ps(iz));
+
+  return _mm256_mul_ps(_mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(xv_gradient, xv_point), _mm256_mul_ps(yv_gradient, yv_point)), _mm256_mul_ps(zv_gradient, zv_point)), _mm256_set1_ps(2.12));
+}
+
 static inline __m256 gradient_coherent_noise_3d_avx2(__m256 x, float y, float z, int seed, enum NoiseQuality noise_quality) {
   __m256i x0 = _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_blendv_ps(_mm256_sub_ps(x, _mm256_set1_ps(1.0)), x, _mm256_cmp_ps(x, _mm256_setzero_ps(), _CMP_GT_OQ))));
   __m256i x1 = _mm256_add_epi32(x0, _mm256_set1_epi32(1));
@@ -957,6 +978,51 @@ static inline __m256 gradient_coherent_noise_3d_avx2(__m256 x, float y, float z,
   __m256 iy1 = linear_interp_avx(ix0, ix1, _mm256_set1_ps(ys));
 
   return linear_interp_avx(iy0, iy1, _mm256_set1_ps(zs));
+}
+
+static inline __m256 gradient_coherent_noise_3d_avx2_normals(__m256 x, __m256 y, __m256 z, int seed, enum NoiseQuality noise_quality) {
+  __m256i x0 = _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_blendv_ps(_mm256_sub_ps(x, _mm256_set1_ps(1.0)), x, _mm256_cmp_ps(x, _mm256_setzero_ps(), _CMP_GT_OQ))));
+  __m256i x1 = _mm256_add_epi32(x0, _mm256_set1_epi32(1));
+  __m256i y0 = _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_blendv_ps(_mm256_sub_ps(y, _mm256_set1_ps(1.0)), y, _mm256_cmp_ps(y, _mm256_setzero_ps(), _CMP_GT_OQ))));
+  __m256i y1 = _mm256_add_epi32(y0, _mm256_set1_epi32(1));
+  __m256i z0 = _mm256_cvtps_epi32(_mm256_floor_ps(_mm256_blendv_ps(_mm256_sub_ps(z, _mm256_set1_ps(1.0)), z, _mm256_cmp_ps(z, _mm256_setzero_ps(), _CMP_GT_OQ))));
+  __m256i z1 = _mm256_add_epi32(z0, _mm256_set1_epi32(1));
+
+  __m256 xs, ys, zs;
+  switch (noise_quality) {
+    case QUALITY_FAST:
+      xs = _mm256_sub_ps(x, _mm256_cvtepi32_ps(x0));
+      ys = _mm256_sub_ps(y, _mm256_cvtepi32_ps(y0));
+      zs = _mm256_sub_ps(z, _mm256_cvtepi32_ps(z0));
+      break;
+    case QUALITY_STANDARD:
+      xs = s_curve3_avx(_mm256_sub_ps(x, _mm256_cvtepi32_ps(x0)));
+      ys = s_curve3_avx(_mm256_sub_ps(y, _mm256_cvtepi32_ps(y0)));
+      zs = s_curve3_avx(_mm256_sub_ps(z, _mm256_cvtepi32_ps(z0)));
+      break;
+    case QUALITY_BEST:
+      xs = s_curve5_avx(_mm256_sub_ps(x, _mm256_cvtepi32_ps(x0)));
+      ys = s_curve5_avx(_mm256_sub_ps(y, _mm256_cvtepi32_ps(y0)));
+      zs = s_curve5_avx(_mm256_sub_ps(z, _mm256_cvtepi32_ps(z0)));
+      break;
+  }
+
+  __m256 n0 = gradient_noise_3d_avx2_normals(x, y, z, x0, y0, z0, seed);
+  __m256 n1 = gradient_noise_3d_avx2_normals(x, y, z, x1, y0, z0, seed);
+  __m256 ix0 = linear_interp_avx(n0, n1, xs);
+  n0 = gradient_noise_3d_avx2_normals(x, y, z, x0, y1, z0, seed);
+  n1 = gradient_noise_3d_avx2_normals(x, y, z, x1, y1, z0, seed);
+  __m256 ix1 = linear_interp_avx(n0, n1, xs);
+  __m256 iy0 = linear_interp_avx(ix0, ix1, ys);
+  n0 = gradient_noise_3d_avx2_normals(x, y, z, x0, y0, z1, seed);
+  n1 = gradient_noise_3d_avx2_normals(x, y, z, x1, y0, z1, seed);
+  ix0 = linear_interp_avx(n0, n1, xs);
+  n0 = gradient_noise_3d_avx2_normals(x, y, z, x0, y1, z1, seed);
+  n1 = gradient_noise_3d_avx2_normals(x, y, z, x1, y1, z1, seed);
+  ix1 = linear_interp_avx(n0, n1, xs);
+  __m256 iy1 = linear_interp_avx(ix0, ix1, ys);
+
+  return linear_interp_avx(iy0, iy1, zs);
 }
 #endif
 

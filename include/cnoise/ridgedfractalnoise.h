@@ -33,6 +33,7 @@ static inline float *ridged_fractal_noise_eval_1d(struct RidgedFractalNoise *rid
 static inline float *ridged_fractal_noise_eval_2d(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size);
 static inline float *ridged_fractal_noise_eval_3d(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size, size_t z_size);
 static inline float ridged_fractal_noise_eval_3d_single(struct RidgedFractalNoise *ridged_fractal_noise, float x_pos, float y_pos, float z_pos);
+static inline void ridged_fractal_noise_eval_normals(struct RidgedFractalNoise *ridged_fractal_noise, float pos[6][3], float dest[6]);
 static inline float *ridged_fractal_noise_eval_3d_fallback(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size, size_t z_size);
 static inline float *ridged_fractal_noise_eval_3d_sse2(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size, size_t z_size);
 static inline float *ridged_fractal_noise_eval_3d_sse4_1(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size, size_t z_size);
@@ -105,6 +106,7 @@ static inline float *ridged_fractal_noise_eval_3d(struct RidgedFractalNoise *rid
   return ridged_fractal_noise->ridged_func(ridged_fractal_noise, x_size, y_size, z_size);
 }
 
+// TODO: Think frequency is in wrong order on simd functions?
 static inline float ridged_fractal_noise_eval_3d_single(struct RidgedFractalNoise *ridged_fractal_noise, float x_pos, float y_pos, float z_pos) {
   float x = (ridged_fractal_noise->position[0] + (x_pos * ridged_fractal_noise->step)) * ridged_fractal_noise->frequency;
   float y = (ridged_fractal_noise->position[1] + (y_pos * ridged_fractal_noise->step)) * ridged_fractal_noise->frequency;
@@ -146,6 +148,49 @@ static inline float ridged_fractal_noise_eval_3d_single(struct RidgedFractalNois
   return (value * 1.25) - 1.0;
 }
 
+// NOTE: Special test function for fast normal calculation
+static inline void ridged_fractal_noise_eval_normals(struct RidgedFractalNoise *ridged_fractal_noise, float pos[6][3], float dest[6]) {
+  __m256 x_vec = _mm256_mul_ps(_mm256_add_ps(_mm256_set1_ps(ridged_fractal_noise->position[0]), _mm256_mul_ps(_mm256_set_ps(pos[0][0], pos[1][0], pos[2][0], pos[3][0], pos[4][0], pos[5][0], 0.0f, 0.0f), _mm256_set1_ps(ridged_fractal_noise->step))), _mm256_set1_ps(ridged_fractal_noise->frequency));
+  __m256 y_vec = _mm256_mul_ps(_mm256_add_ps(_mm256_set1_ps(ridged_fractal_noise->position[1]), _mm256_mul_ps(_mm256_set_ps(pos[0][1], pos[1][1], pos[2][1], pos[3][1], pos[4][1], pos[5][1], 0.0f, 0.0f), _mm256_set1_ps(ridged_fractal_noise->step))), _mm256_set1_ps(ridged_fractal_noise->frequency));
+  __m256 z_vec = _mm256_mul_ps(_mm256_add_ps(_mm256_set1_ps(ridged_fractal_noise->position[2]), _mm256_mul_ps(_mm256_set_ps(pos[0][2], pos[1][2], pos[2][2], pos[3][2], pos[4][2], pos[5][2], 0.0f, 0.0f), _mm256_set1_ps(ridged_fractal_noise->step))), _mm256_set1_ps(ridged_fractal_noise->frequency));
+
+  //(ridged_fractal_noise->position[2] + (z_dim * ridged_fractal_noise->step)) * ridged_fractal_noise->frequency
+  __m256 value = _mm256_set1_ps(0.0);
+  __m256 weight = _mm256_set1_ps(1.0);
+
+  float offset = 1.0;
+  float gain = 2.0;
+
+  for (int cur_octave = 0; cur_octave < ridged_fractal_noise->octave_count; cur_octave++) {
+    __m256 nx = make_int_32_range_avx(x_vec);
+    __m256 ny = make_int_32_range_avx(y_vec);
+    __m256 nz = make_int_32_range_avx(z_vec);
+
+    int cur_seed = (ridged_fractal_noise->seed + cur_octave) & 0x7fffffff;
+    __m256 signal = gradient_coherent_noise_3d_avx2_normals(nx, ny, nz, cur_seed, ridged_fractal_noise->noise_quality);
+
+    signal = _mm256_andnot_ps(_mm256_set1_ps(-0.0), signal);
+    signal = _mm256_sub_ps(_mm256_set1_ps(offset), signal);
+
+    signal = _mm256_mul_ps(signal, signal);
+    signal = _mm256_mul_ps(signal, weight);
+
+    weight = _mm256_mul_ps(signal, _mm256_set1_ps(gain));
+
+    weight = _mm256_blendv_ps(weight, _mm256_set1_ps(1.0), _mm256_cmp_ps(weight, _mm256_set1_ps(1.0), _CMP_GT_OQ));
+    weight = _mm256_blendv_ps(weight, _mm256_setzero_ps(), _mm256_cmp_ps(weight, _mm256_setzero_ps(), _CMP_LT_OQ));
+
+    value = _mm256_add_ps(value, _mm256_mul_ps(signal, _mm256_set1_ps(ridged_fractal_noise->spectral_weights[cur_octave])));
+
+    x_vec = _mm256_mul_ps(x_vec, _mm256_set1_ps(ridged_fractal_noise->lacunarity));
+    y_vec = _mm256_mul_ps(y_vec, _mm256_set1_ps(ridged_fractal_noise->lacunarity));
+    z_vec = _mm256_mul_ps(z_vec, _mm256_set1_ps(ridged_fractal_noise->lacunarity));
+  }
+
+  for (int copy_num = 7; copy_num > 1; copy_num--)
+    dest[-copy_num + 7] = *(((float *)&value) + copy_num);
+}
+
 static inline float *ridged_fractal_noise_eval_3d_fallback(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size, size_t z_size) {
 #ifdef CUSTOM_ALLOCATOR
   float *noise_set = malloc(sizeof(float) * x_size * y_size * z_size);
@@ -165,9 +210,6 @@ static inline float *ridged_fractal_noise_eval_3d_fallback(struct RidgedFractalN
 
         float offset = 1.0;
         float gain = 2.0;
-
-        if (x_dim == 7 && y_dim == 0 && z_dim == 0)
-          asm("nop");
 
         for (int cur_octave = 0; cur_octave < ridged_fractal_noise->octave_count; cur_octave++) {
           float nx = make_int_32_range(x);
@@ -361,9 +403,6 @@ static inline float *ridged_fractal_noise_eval_3d_avx2(struct RidgedFractalNoise
 
         __m256 value = _mm256_set1_ps(0.0);
         __m256 weight = _mm256_set1_ps(1.0);
-
-        if (x_dim == 0 && y_dim == 0 && z_dim == 1)
-          asm("nop");
 
         float offset = 1.0;
         float gain = 2.0;
