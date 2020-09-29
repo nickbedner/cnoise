@@ -115,6 +115,7 @@ static inline __m256i int_value_noise_3d_avx2(__m256i x, int y, int z, int seed)
 static inline __m256 value_noise_3d_avx2_full(__m256i x, __m256i y, __m256i z, int seed);
 static inline __m256 value_noise_3d_avx2(__m256i x, int y, int z, int seed);
 static inline __m256 gradient_noise_3d_avx2(__m256 fx, float fy, float fz, __m256i ix, int iy, int iz, int seed);
+static inline __m256 gradient_noise_3d_avx2_normals(__m256 fx, __m256 fy, __m256 fz, __m256i ix, __m256i iy, __m256i iz, int seed);
 static inline __m256 gradient_coherent_noise_3d_avx2(__m256 x, float y, float z, int seed, enum NoiseQuality noise_quality);
 static inline __m256 gradient_coherent_noise_3d_avx2_normals(__m256 x, __m256 y, __m256 z, int seed, enum NoiseQuality noise_quality);
 #endif
@@ -914,7 +915,7 @@ static inline __m256 gradient_noise_3d_avx2(__m256 fx, float fy, float fz, __m25
   return _mm256_mul_ps(_mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(xv_gradient, xv_point), _mm256_mul_ps(yv_gradient, yv_point)), _mm256_mul_ps(zv_gradient, zv_point)), _mm256_set1_ps(2.12));
 }
 
-static inline __m256 gradient_noise_3d_avx2_normals(__m256 fx, __m256i fy, __m256i fz, __m256i ix, __m256i iy, __m256i iz, int seed) {
+static inline __m256 gradient_noise_3d_avx2_normals(__m256 fx, __m256 fy, __m256 fz, __m256i ix, __m256i iy, __m256i iz, int seed) {
   __m256i y = _mm256_mullo_epi32(_mm256_set1_epi32(Y_NOISE_GEN), iy);
   __m256i z = _mm256_mullo_epi32(_mm256_set1_epi32(Z_NOISE_GEN), iz);
   __m256i y_z_seed = _mm256_add_epi32(_mm256_add_epi32(y, _mm256_set1_epi32(SEED_NOISE_GEN * seed)), z);
