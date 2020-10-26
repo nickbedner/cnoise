@@ -18,7 +18,7 @@ add_executable(Benchmarks ${benchmarks_SRC})
 
 if (WIN32)
 # Add OpenMP
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /arch:AVX /arch:AVX /arch:AVX /arch:AVX2")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /arch:AVX /arch:AVX2")
 else()
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse2 -msse4.1 -mavx -mavx2")
         if (APPLE)
