@@ -350,7 +350,6 @@ static inline float *ridged_fractal_noise_eval_3d_avx(struct RidgedFractalNoise 
 
 static inline float *ridged_fractal_noise_eval_3d_avx2(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size, size_t z_size) {
   float *noise_set = noise_allocate(sizeof(__m256), sizeof(float) * x_size * y_size * z_size);
-#pragma omp parallel for collapse(3) if (ridged_fractal_noise->parallel)
   //  int A[1] = {-1};
   //#pragma omp target
   //  {
@@ -361,6 +360,7 @@ static inline float *ridged_fractal_noise_eval_3d_avx2(struct RidgedFractalNoise
   //    printf("Able to use offloading!\n");
   //  }
   //#pragma omp target teams distribute parallel for collapse(3)
+#pragma omp parallel for collapse(3) if (ridged_fractal_noise->parallel)
   for (int z_dim = 0; z_dim < z_size; z_dim++) {
     for (int y_dim = 0; y_dim < y_size; y_dim++) {
       for (int x_dim = 0; x_dim < x_size; x_dim += 8) {

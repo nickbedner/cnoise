@@ -18,14 +18,16 @@ enum NoiseType {
   SPHERE_NOISE
 };
 
-union Noise {
+struct Noise {
   enum NoiseType noise_type;
-  struct BillowNoise billow_noise;
-  struct PerlinNoise perlin_noise;
-  struct RidgedFractalNoise ridged_fractal_noise;
-  struct VoronoiNoise voronoi_noise;
-  struct WhiteNoise white_noise;
-  struct SphereNoise sphere_noise;
+  union {
+    struct BillowNoise billow_noise;
+    struct PerlinNoise perlin_noise;
+    struct RidgedFractalNoise ridged_fractal_noise;
+    struct VoronoiNoise voronoi_noise;
+    struct WhiteNoise white_noise;
+    struct SphereNoise sphere_noise;
+  };
 };
 
 #endif  // CNOISE_H
