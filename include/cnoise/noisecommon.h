@@ -63,13 +63,13 @@ enum NoiseQuality {
 #define SHIFT_NOISE_GEN 8
 
 enum SIMDType {
-  SIMD_FALLBACK = 0,
-  SIMD_SSE2 = 1,
-  SIMD_SSE4_1 = 2,
-  SIMD_AVX = 3,
-  SIMD_AVX2 = 4,
-  SIMD_AVX512F = 5,
-  SIMD_NEON = 6
+  NOISE_SIMD_FALLBACK = 0,
+  NOISE_SIMD_SSE2,
+  NOISE_SIMD_SSE4_1,
+  NOISE_SIMD_AVX,
+  NOISE_SIMD_AVX2,
+  NOISE_SIMD_AVX512F,
+  NOISE_SIMD_NEO
 };
 
 static inline void *noise_allocate(size_t alignment, size_t size);
@@ -78,6 +78,7 @@ static inline float noise_get(float *noise_set, int x_size, int y_size, int z_si
 static inline int detect_simd_support();
 #ifdef ARCH_32_64
 // SSE2
+#ifdef SIMD_SSE2
 static inline __m128i sse2_mm_mullo_epi32(__m128i a, __m128i b);
 static inline int sse2_mm_extract_epi32(__m128i a, int index);
 static inline __m128 make_int_32_range_sse2(__m128 n);
@@ -90,14 +91,18 @@ static inline __m128 value_noise_3d_sse2_full(__m128i x, __m128i y, __m128i z, i
 static inline __m128 value_noise_3d_sse2(__m128i x, int y, int z, int seed);
 static inline __m128 gradient_noise_3d_sse2(__m128 fx, float fy, float fz, __m128i ix, int iy, int iz, int seed);
 static inline __m128 gradient_coherent_noise_3d_sse2(__m128 x, float y, float z, int seed, enum NoiseQuality noise_quality);
+#endif
 // SSE4_1
+#ifdef SIMD_SSE41
 static inline __m128i int_value_noise_3d_sse4_1_full(__m128i x, __m128i y, __m128i z, int seed);
 static inline __m128i int_value_noise_3d_sse4_1(__m128i x, int y, int z, int seed);
 static inline __m128 value_noise_3d_sse4_1_full(__m128i x, __m128i y, __m128i z, int seed);
 static inline __m128 value_noise_3d_sse4_1(__m128i x, int y, int z, int seed);
 static inline __m128 gradient_noise_3d_sse4_1(__m128 fx, float fy, float fz, __m128i ix, int iy, int iz, int seed);
 static inline __m128 gradient_coherent_noise_3d_sse4_1(__m128 x, float y, float z, int seed, enum NoiseQuality noise_quality);
+#endif
 // AVX
+#ifdef SIMD_AVX
 static inline __m256 make_int_32_range_avx(__m256 n);
 static inline __m256 s_curve3_avx(__m256 a);
 static inline __m256 s_curve5_avx(__m256 a);
@@ -108,7 +113,9 @@ static inline __m256 value_noise_3d_avx_full(__m256i x, __m256i y, __m256i z, in
 static inline __m256 value_noise_3d_avx(__m256i x, int y, int z, int seed);
 static inline __m256 gradient_noise_3d_avx(__m256 fx, float fy, float fz, __m256i ix, int iy, int iz, int seed);
 static inline __m256 gradient_coherent_noise_3d_avx(__m256 x, float y, float z, int seed, enum NoiseQuality noise_quality);
+#endif
 // AVX2
+#ifdef SIMD_AVX2
 static inline __m256i fast_floor_avx2(__m256 x);
 static inline __m256i int_value_noise_3d_avx2_full(__m256i x, __m256i y, __m256i z, int seed);
 static inline __m256i int_value_noise_3d_avx2(__m256i x, int y, int z, int seed);
@@ -118,6 +125,7 @@ static inline __m256 gradient_noise_3d_avx2(__m256 fx, float fy, float fz, __m25
 static inline __m256 gradient_noise_3d_avx2_normals(__m256 fx, __m256 fy, __m256 fz, __m256i ix, __m256i iy, __m256i iz, int seed);
 static inline __m256 gradient_coherent_noise_3d_avx2(__m256 x, float y, float z, int seed, enum NoiseQuality noise_quality);
 static inline __m256 gradient_coherent_noise_3d_avx2_normals(__m256 x, __m256 y, __m256 z, int seed, enum NoiseQuality noise_quality);
+#endif
 #endif
 // Fallback
 static inline float make_int_32_range(float n);
@@ -443,24 +451,24 @@ static inline int detect_simd_support() {
 #endif
 
   if (avx512f_supported && ((xcr_feature_mask & 0xe6) == 0xe6))
-    return SIMD_AVX512F;
+    return NOISE_SIMD_AVX512F;
   else if (avx2_supported && ((xcr_feature_mask & 0x6) == 0x6))
-    return SIMD_AVX2;
+    return NOISE_SIMD_AVX2;
   else if (avx_supported && ((xcr_feature_mask & 0x6) == 0x6))
-    return SIMD_AVX;
+    return NOISE_SIMD_AVX;
   else if (sse4_1_supported)
-    return SIMD_SSE4_1;
+    return NOISE_SIMD_SSE4_1;
   else if (sse2_supported)
-    return SIMD_SSE2;
+    return NOISE_SIMD_SSE2;
   else
-    return SIMD_FALLBACK;
+    return NOISE_SIMD_FALLBACK;
 #else
   bool neon_supported = false;
 
   if (neon_supported)
-    return SIMD_NEON;
+    return NOISE_SIMD_NEON;
   else
-    return SIMD_FALLBACK;
+    return NOISE_SIMD_FALLBACK;
 #endif
 }
 
@@ -489,17 +497,17 @@ static inline bool check_simd_support(int instruction_type) {
     avx_supported = false;
 #endif
 
-  if (avx512f_supported && ((xcr_feature_mask & 0xe6) == 0xe6) && instruction_type == SIMD_AVX512F)
+  if (avx512f_supported && ((xcr_feature_mask & 0xe6) == 0xe6) && instruction_type == NOISE_SIMD_AVX512F)
     return true;
-  else if (avx2_supported && ((xcr_feature_mask & 0x6) == 0x6) && instruction_type == SIMD_AVX2)
+  else if (avx2_supported && ((xcr_feature_mask & 0x6) == 0x6) && instruction_type == NOISE_SIMD_AVX2)
     return true;
-  else if (avx_supported && ((xcr_feature_mask & 0x6) == 0x6) && instruction_type == SIMD_AVX)
+  else if (avx_supported && ((xcr_feature_mask & 0x6) == 0x6) && instruction_type == NOISE_SIMD_AVX)
     return true;
-  else if (sse4_1_supported && instruction_type == SIMD_SSE4_1)
+  else if (sse4_1_supported && instruction_type == NOISE_SIMD_SSE4_1)
     return true;
-  else if (sse2_supported && instruction_type == SIMD_SSE2)
+  else if (sse2_supported && instruction_type == NOISE_SIMD_SSE2)
     return true;
-  else if (instruction_type == SIMD_FALLBACK)
+  else if (instruction_type == NOISE_SIMD_FALLBACK)
     return true;
   else
     return false;
@@ -515,6 +523,7 @@ static inline bool check_simd_support(int instruction_type) {
 
 #ifdef ARCH_32_64
 // SSE2 compatible mullo
+#ifdef SIMD_SSE2
 static inline __m128i sse2_mm_mullo_epi32(__m128i a, __m128i b) {
   __m128i tmp_1 = _mm_mul_epu32(a, b);
   __m128i tmp_2 = _mm_mul_epu32(_mm_srli_si128(a, 4), _mm_srli_si128(b, 4));
@@ -667,7 +676,9 @@ static inline __m128 gradient_coherent_noise_3d_sse2(__m128 x, float y, float z,
   __m128 iy1 = linear_interp_sse2(ix0, ix1, _mm_set1_ps(ys));
   return linear_interp_sse2(iy0, iy1, _mm_set1_ps(zs));
 }
+#endif
 
+#ifdef SIMD_SSE41
 static inline __m128i int_value_noise_3d_sse4_1_full(__m128i x, __m128i y, __m128i z, int seed) {
   __m128i n = _mm_and_si128(_mm_add_epi32(_mm_mullo_epi32(_mm_set1_epi32(X_NOISE_GEN), x), _mm_add_epi32(_mm_mullo_epi32(_mm_set1_epi32(Y_NOISE_GEN), y), _mm_add_epi32(_mm_mullo_epi32(_mm_set1_epi32(Z_NOISE_GEN), z), _mm_set1_epi32(SEED_NOISE_GEN * seed)))), _mm_set1_epi32(0x7fffffff));
   n = _mm_xor_si128(_mm_srli_epi32(n, 13), n);
@@ -748,7 +759,9 @@ static inline __m128 gradient_coherent_noise_3d_sse4_1(__m128 x, float y, float 
   __m128 iy1 = linear_interp_sse2(ix0, ix1, _mm_set1_ps(ys));
   return linear_interp_sse2(iy0, iy1, _mm_set1_ps(zs));
 }
+#endif
 
+#ifdef SIMD_AVX
 // TODO: Clean this up slow way of doing this
 static inline __m256 make_int_32_range_avx(__m256 n) {
   __m256 new_n;
@@ -877,7 +890,9 @@ static inline __m256 gradient_coherent_noise_3d_avx(__m256 x, float y, float z, 
   __m256 iy1 = linear_interp_avx(ix0, ix1, _mm256_set1_ps(ys));
   return linear_interp_avx(iy0, iy1, _mm256_set1_ps(zs));
 }
+#endif
 
+#ifdef SIMD_AVX2
 static inline __m256i int_value_noise_3d_avx2_full(__m256i x, __m256i y, __m256i z, int seed) {
   __m256i n = _mm256_and_si256(_mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(X_NOISE_GEN), x), _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(Y_NOISE_GEN), y), _mm256_add_epi32(_mm256_mullo_epi32(_mm256_set1_epi32(Z_NOISE_GEN), z), _mm256_set1_epi32(SEED_NOISE_GEN * seed)))), _mm256_set1_epi32(0x7fffffff));
   n = _mm256_xor_si256(_mm256_srli_epi32(n, 13), n);
@@ -1025,6 +1040,7 @@ static inline __m256 gradient_coherent_noise_3d_avx2_normals(__m256 x, __m256 y,
 
   return linear_interp_avx(iy0, iy1, zs);
 }
+#endif
 #endif
 
 static inline float make_int_32_range(float n) {

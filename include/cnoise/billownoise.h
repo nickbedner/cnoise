@@ -55,19 +55,19 @@ static inline void billow_noise_init(struct BillowNoise *billow_noise) {
 
   switch (detect_simd_support()) {
 #ifdef ARCH_32_64
-    case SIMD_AVX512F:
+    case NOISE_SIMD_AVX512F:
       billow_noise->billow_func = &billow_noise_eval_3d_fallback;
       break;
-    case SIMD_AVX2:
+    case NOISE_SIMD_AVX2:
       billow_noise->billow_func = &billow_noise_eval_3d_avx2;
       break;
-    case SIMD_AVX:
+    case NOISE_SIMD_AVX:
       billow_noise->billow_func = &billow_noise_eval_3d_avx;
       break;
-    case SIMD_SSE4_1:
+    case NOISE_SIMD_SSE4_1:
       billow_noise->billow_func = &billow_noise_eval_3d_sse4_1;
       break;
-    case SIMD_SSE2:
+    case NOISE_SIMD_SSE2:
       billow_noise->billow_func = &billow_noise_eval_3d_sse2;
       break;
 #else
@@ -166,6 +166,7 @@ static inline float *billow_noise_eval_3d_fallback(struct BillowNoise *billow_no
 }
 
 #ifdef ARCH_32_64
+#ifdef SIMD_SSE2
 static inline float *billow_noise_eval_3d_sse2(struct BillowNoise *billow_noise, size_t x_size, size_t y_size, size_t z_size) {
   float *noise_set = noise_allocate(sizeof(__m128), sizeof(float) * x_size * y_size * z_size);
 #pragma omp parallel for collapse(3) if (billow_noise->parallel)
@@ -203,7 +204,9 @@ static inline float *billow_noise_eval_3d_sse2(struct BillowNoise *billow_noise,
   }
   return noise_set;
 }
+#endif
 
+#ifdef SIMD_SSE41
 static inline float *billow_noise_eval_3d_sse4_1(struct BillowNoise *billow_noise, size_t x_size, size_t y_size, size_t z_size) {
   float *noise_set = noise_allocate(sizeof(__m128), sizeof(float) * x_size * y_size * z_size);
 #pragma omp parallel for collapse(3) if (billow_noise->parallel)
@@ -241,7 +244,9 @@ static inline float *billow_noise_eval_3d_sse4_1(struct BillowNoise *billow_nois
   }
   return noise_set;
 }
+#endif
 
+#ifdef SIMD_AVX
 static inline float *billow_noise_eval_3d_avx(struct BillowNoise *billow_noise, size_t x_size, size_t y_size, size_t z_size) {
   float *noise_set = noise_allocate(sizeof(__m256), sizeof(float) * x_size * y_size * z_size);
 #pragma omp parallel for collapse(3) if (billow_noise->parallel)
@@ -279,7 +284,9 @@ static inline float *billow_noise_eval_3d_avx(struct BillowNoise *billow_noise, 
   }
   return noise_set;
 }
+#endif
 
+#ifdef SIMD_AVX2
 static inline float *billow_noise_eval_3d_avx2(struct BillowNoise *billow_noise, size_t x_size, size_t y_size, size_t z_size) {
   float *noise_set = noise_allocate(sizeof(__m256), sizeof(float) * x_size * y_size * z_size);
 #pragma omp parallel for collapse(3) if (billow_noise->parallel)
@@ -317,7 +324,7 @@ static inline float *billow_noise_eval_3d_avx2(struct BillowNoise *billow_noise,
   }
   return noise_set;
 }
-
+#endif
 #endif
 
 #endif  // BILLOW_NOISE_H

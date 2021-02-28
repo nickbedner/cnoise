@@ -49,19 +49,19 @@ static inline void voronoi_noise_init(struct VoronoiNoise *voronoi_noise) {
 
   switch (detect_simd_support()) {
 #ifdef ARCH_32_64
-    case SIMD_AVX512F:
+    case NOISE_SIMD_AVX512F:
       voronoi_noise->voronoi_func = &voronoi_noise_eval_3d_fallback;
       break;
-    case SIMD_AVX2:
+    case NOISE_SIMD_AVX2:
       voronoi_noise->voronoi_func = &voronoi_noise_eval_3d_avx2;
       break;
-    case SIMD_AVX:
+    case NOISE_SIMD_AVX:
       voronoi_noise->voronoi_func = &voronoi_noise_eval_3d_avx;
       break;
-    case SIMD_SSE4_1:
+    case NOISE_SIMD_SSE4_1:
       voronoi_noise->voronoi_func = &voronoi_noise_eval_3d_sse4_1;
       break;
-    case SIMD_SSE2:
+    case NOISE_SIMD_SSE2:
       voronoi_noise->voronoi_func = &voronoi_noise_eval_3d_sse2;
       break;
 #else
@@ -195,6 +195,7 @@ static inline float *voronoi_noise_eval_3d_fallback(struct VoronoiNoise *voronoi
 }
 
 #ifdef ARCH_32_64
+#ifdef SIMD_SSE2
 static inline float *voronoi_noise_eval_3d_sse2(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size, size_t z_size) {
   float *noise_set = noise_allocate(sizeof(__m128), sizeof(float) * x_size * y_size * z_size);
 #pragma omp parallel for collapse(3) if (voronoi_noise->parallel)
@@ -264,7 +265,9 @@ static inline float *voronoi_noise_eval_3d_sse2(struct VoronoiNoise *voronoi_noi
   }
   return noise_set;
 }
+#endif
 
+#ifdef SIMD_SSE41
 static inline float *voronoi_noise_eval_3d_sse4_1(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size, size_t z_size) {
   float *noise_set = noise_allocate(sizeof(__m128), sizeof(float) * x_size * y_size * z_size);
 #pragma omp parallel for collapse(3) if (voronoi_noise->parallel)
@@ -321,7 +324,9 @@ static inline float *voronoi_noise_eval_3d_sse4_1(struct VoronoiNoise *voronoi_n
   }
   return noise_set;
 }
+#endif
 
+#ifdef SIMD_AVX
 static inline float *voronoi_noise_eval_3d_avx(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size, size_t z_size) {
   float *noise_set = noise_allocate(sizeof(__m256), sizeof(float) * x_size * y_size * z_size);
 #pragma omp parallel for collapse(3) if (voronoi_noise->parallel)
@@ -380,7 +385,9 @@ static inline float *voronoi_noise_eval_3d_avx(struct VoronoiNoise *voronoi_nois
   }
   return noise_set;
 }
+#endif
 
+#ifdef SIMD_AVX2
 static inline float *voronoi_noise_eval_3d_avx2(struct VoronoiNoise *voronoi_noise, size_t x_size, size_t y_size, size_t z_size) {
   float *noise_set = noise_allocate(sizeof(__m256), sizeof(float) * x_size * y_size * z_size);
 #pragma omp parallel for collapse(3) if (voronoi_noise->parallel)
@@ -437,6 +444,7 @@ static inline float *voronoi_noise_eval_3d_avx2(struct VoronoiNoise *voronoi_noi
   }
   return noise_set;
 }
+#endif
 #endif
 
 #endif  // VORONOI_NOISE_H

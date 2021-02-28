@@ -48,19 +48,19 @@ static inline void sphere_noise_init(struct SphereNoise *sphere_noise) {
 
   switch (detect_simd_support()) {
 #ifdef ARCH_32_64
-    /*case SIMD_AVX512F:
+    /*case NOISE_SIMD_AVX512F:
       sphere_noise->sphere_func = &sphere_noise_eval_3d_fallback;
       break;
-    case SIMD_AVX2:
+    case NOISE_SIMD_AVX2:
       sphere_noise->sphere_func = &sphere_noise_eval_3d_avx2;
       break;
-    case SIMD_AVX:
+    case NOISE_SIMD_AVX:
       sphere_noise->sphere_func = &sphere_noise_eval_3d_avx;
       break;
-    case SIMD_SSE4_1:
+    case NOISE_SIMD_SSE4_1:
       sphere_noise->sphere_func = &sphere_noise_eval_3d_sse4_1;
       break;
-    case SIMD_SSE2:
+    case NOISE_SIMD_SSE2:
       sphere_noise->sphere_func = &sphere_noise_eval_3d_sse2;
       break;*/
 #else

@@ -68,19 +68,19 @@ static inline void ridged_fractal_noise_init(struct RidgedFractalNoise *ridged_f
 
   switch (detect_simd_support()) {
 #ifdef ARCH_32_64
-    case SIMD_AVX512F:
+    case NOISE_SIMD_AVX512F:
       ridged_fractal_noise->ridged_func = &ridged_fractal_noise_eval_3d_fallback;
       break;
-    case SIMD_AVX2:
+    case NOISE_SIMD_AVX2:
       ridged_fractal_noise->ridged_func = &ridged_fractal_noise_eval_3d_avx2;
       break;
-    case SIMD_AVX:
+    case NOISE_SIMD_AVX:
       ridged_fractal_noise->ridged_func = &ridged_fractal_noise_eval_3d_avx;
       break;
-    case SIMD_SSE4_1:
+    case NOISE_SIMD_SSE4_1:
       ridged_fractal_noise->ridged_func = &ridged_fractal_noise_eval_3d_sse4_1;
       break;
-    case SIMD_SSE2:
+    case NOISE_SIMD_SSE2:
       ridged_fractal_noise->ridged_func = &ridged_fractal_noise_eval_3d_sse2;
       break;
 #else
@@ -202,6 +202,7 @@ static inline float *ridged_fractal_noise_eval_3d_fallback(struct RidgedFractalN
 }
 
 #ifdef ARCH_32_64
+#ifdef SIMD_SSE2
 static inline float *ridged_fractal_noise_eval_3d_sse2(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size, size_t z_size) {
   float *noise_set = noise_allocate(sizeof(__m128), sizeof(float) * x_size * y_size * z_size);
 #pragma omp parallel for collapse(3) if (ridged_fractal_noise->parallel)
@@ -251,7 +252,9 @@ static inline float *ridged_fractal_noise_eval_3d_sse2(struct RidgedFractalNoise
   }
   return noise_set;
 }
+#endif
 
+#ifdef SIMD_SSE41
 static inline float *ridged_fractal_noise_eval_3d_sse4_1(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size, size_t z_size) {
   float *noise_set = noise_allocate(sizeof(__m128), sizeof(float) * x_size * y_size * z_size);
 #pragma omp parallel for collapse(3) if (ridged_fractal_noise->parallel)
@@ -299,7 +302,9 @@ static inline float *ridged_fractal_noise_eval_3d_sse4_1(struct RidgedFractalNoi
   }
   return noise_set;
 }
+#endif
 
+#ifdef SIMD_AVX
 static inline float *ridged_fractal_noise_eval_3d_avx(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size, size_t z_size) {
   float *noise_set = noise_allocate(sizeof(__m256), sizeof(float) * x_size * y_size * z_size);
 #pragma omp parallel for collapse(3) if (ridged_fractal_noise->parallel)
@@ -347,7 +352,9 @@ static inline float *ridged_fractal_noise_eval_3d_avx(struct RidgedFractalNoise 
   }
   return noise_set;
 }
+#endif
 
+#ifdef SIMD_AVX2
 static inline float *ridged_fractal_noise_eval_3d_avx2(struct RidgedFractalNoise *ridged_fractal_noise, size_t x_size, size_t y_size, size_t z_size) {
   float *noise_set = noise_allocate(sizeof(__m256), sizeof(float) * x_size * y_size * z_size);
   //  int A[1] = {-1};
@@ -451,6 +458,7 @@ static inline void ridged_fractal_noise_eval_custom(struct RidgedFractalNoise *r
   //for (int copy_num = 9; copy_num > 1; copy_num--)
   //  dest[-copy_num + 9] = *(((float *)&value) + copy_num);
 }
+#endif
 #endif
 
 #endif  // RIDGID_FRACTAL_NOISE_H
