@@ -77,6 +77,18 @@ static inline void noise_free(float *data);
 static inline float noise_get(float *noise_set, int x_size, int y_size, int z_size, int x, int y, int z);
 static inline int detect_simd_support();
 #ifdef ARCH_32_64
+#ifndef SIMD_SSE2_OFF
+#define SIMD_SSE2
+#endif
+#ifndef SIMD_SSE41_OFF
+#define SIMD_SSE41
+#endif
+#ifndef SIMD_AVX_OFF
+#define SIMD_AVX
+#endif
+#ifndef SIMD_AVX2_OFF
+#define SIMD_AVX2
+#endif
 // SSE2
 #ifdef SIMD_SSE2
 static inline __m128i sse2_mm_mullo_epi32(__m128i a, __m128i b);
